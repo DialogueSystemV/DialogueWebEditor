@@ -75,10 +75,10 @@ export function DialogueNode({
       </div>
 
       {/* Node Content */}
-      <div className="p-3 space-y-2">
+      <div className="p-3 space-y-2 bg-gray-800">
         {node.data.questionText && (
-          <div className="text-xs text-gray-300 bg-gray-800 p-2 rounded">
-            Question: {node.data.questionText}
+          <div className="flex items-center justify-between bg-gray-700 p-1 rounded text-xs p-2 text-white">
+            <span className="truncate">{node.data.questionText}</span>
           </div>
         )}
 
@@ -91,7 +91,7 @@ export function DialogueNode({
             </div>
             <div className="space-y-1">
               {node.data.answers.map((answer) => (
-                <div key={answer.id} className="flex items-center justify-between bg-gray-800 p-1 rounded text-xs">
+                <div key={answer.id} className="flex items-center justify-between bg-gray-700 p-1 rounded text-xs p-2">
                   <span className="text-gray-300 truncate">{answer.text}</span>
                 </div>
               ))}

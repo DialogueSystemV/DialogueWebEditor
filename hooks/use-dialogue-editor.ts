@@ -63,7 +63,10 @@ export function useDialogueEditor() {
     const newNode: NodeData = {
       id: Date.now().toString(),
       title: "Question Node",
-      position: { x: 200, y: 200 },
+      position: { 
+        x: window.innerWidth / 3 + (Math.random() * 50 - 25) + nodes.length,
+        y: window.innerHeight / 3 + (Math.random() * 50 - 25) + nodes.length
+      },
       data: {
         answers: type === "question" ? [] : undefined,
       },
@@ -81,7 +84,17 @@ export function useDialogueEditor() {
 
   const updateNodeData = (nodeId: string, field: string, value: any) => {
     setNodes((prev) =>
-      prev.map((node) => (node.id === nodeId ? { ...node, data: { ...node.data, [field]: value } } : node)),
+      prev.map((node) => {
+        if (node.id === nodeId) {
+          // Handle top-level properties like title
+          if (field === "title") {
+            return { ...node, title: value }
+          }
+          // Handle data properties
+          return { ...node, data: { ...node.data, [field]: value } }
+        }
+        return node
+      }),
     )
   }
 
