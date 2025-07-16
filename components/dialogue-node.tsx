@@ -1,0 +1,104 @@
+"use client"
+
+import React from "react"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Trash2, Link } from "lucide-react"
+import type { NodeData, Answer } from "@/types/dialogue"
+import { nodeTypes } from "@/types/dialogue"
+
+interface DialogueNodeProps {
+  node: NodeData
+  isSelected: boolean
+  isConnecting: boolean
+  onMouseDown: (e: React.MouseEvent, nodeId: string) => void
+  onClick: (nodeId: string, isRightClick?: boolean) => void
+  onDelete: (nodeId: string) => void
+  onStartConnecting: (nodeId: string, answerId: string) => void
+}
+
+export function DialogueNode({
+  node,
+  isSelected,
+  isConnecting,
+  onMouseDown,
+  onClick,
+  onDelete,
+  onStartConnecting,
+}: DialogueNodeProps) {
+  return (
+    <Card
+      className={`absolute w-72 bg-gray-700 border-gray-600 cursor-move ${isSelected ? "ring-2 ring-blue-500" : ""
+        } ${isConnecting ? "ring-2 ring-green-500" : ""}`}
+      style={{
+        left: node.position.x,
+        top: node.position.y,
+        userSelect: "none",
+      }}
+      onMouseDown={(e) => onMouseDown(e, node.id)}
+      onClick={() => onClick(node.id)}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        onClick(node.id, true)
+      }}
+    >
+      {/* Node Header */}
+      <div className={`bg-blue-600 px-3 py-2 rounded-t-lg`}>
+        <div className="flex items-center justify-between">
+          <span className="text-white font-medium text-sm">{node.title}</span>
+          <div className="flex space-x-1">
+            <Button
+              variant="ghost" 
+              size="icon"
+              className="h-6 w-6 text-white hover:bg-white/20"
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(node.id)
+              }}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon" 
+              className="h-6 w-6 text-white hover:bg-white/20"
+              onClick={(e) => {
+                e.stopPropagation()
+                onStartConnecting(node.id, "null")
+              }}
+            >
+              <Link className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Node Content */}
+      <div className="p-3 space-y-2">
+        {node.data.questionText && (
+          <div className="text-xs text-gray-300 bg-gray-800 p-2 rounded">
+            Question: {node.data.questionText}
+          </div>
+        )}
+
+        {node.data.answers && node.data.answers.length > 0 && (
+          <div className="text-xs text-gray-300">
+            <div className="flex items-center justify-between mb-1">
+              <Badge variant="default" className="text-white text-xs">
+                {node.data.answers.length} answers
+              </Badge>
+            </div>
+            <div className="space-y-1">
+              {node.data.answers.map((answer) => (
+                <div key={answer.id} className="flex items-center justify-between bg-gray-800 p-1 rounded text-xs">
+                  <span className="text-gray-300 truncate">{answer.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  )
+} 
