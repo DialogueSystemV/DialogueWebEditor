@@ -46,6 +46,8 @@ export function DialogueEditor() {
 
         <DialogueToolbar
           onAddNode={addNode}
+          nodes={nodes} 
+          connections={connections}
           connecting={connecting}
           removing={removing}
           onCancelConnecting={cancelConnecting}
