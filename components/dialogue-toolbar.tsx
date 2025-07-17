@@ -3,11 +3,13 @@
 import React from "react"
 import { Button } from "@/components/ui/button"
 import { Plus, X } from "lucide-react"
-import { nodeTypes, type NodeType } from "@/types/dialogue"
+import { Connection, NodeData, nodeTypes, type NodeType } from "@/types/dialogue"
 import { Toaster } from "sonner"
 
 interface DialogueToolbarProps {
   onAddNode: (type: NodeType) => void
+  nodes: NodeData[]
+  connections: Connection[]
   connecting: { nodeId: string } | null
   removing: { nodeId: string } | null
   onCancelConnecting: () => void
@@ -16,6 +18,8 @@ interface DialogueToolbarProps {
 
 export function DialogueToolbar({ 
   onAddNode, 
+  nodes,
+  connections,
   connecting, 
   removing, 
   onCancelConnecting, 
@@ -35,7 +39,16 @@ export function DialogueToolbar({
           {config.title}
         </Button>
       ))}
-      
+
+       <Button
+          variant="secondary"
+          disabled
+          size="sm"
+          className="bg-gray-700 hover:bg-gray-600 text-white"
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Export
+        </Button>
       {connecting && (
         <div className="flex items-center space-x-2 bg-green-900/50 px-3 py-1 rounded-md border border-green-500">
           <span className="text-green-300 text-sm">Connecting...</span>

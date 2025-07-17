@@ -5,13 +5,14 @@ export interface Answer {
   condition?: string
   endsCondition: boolean
   action?: string
-  targetNodeId?: string
 }
 
 export interface NodeData {
   id: string
   title: string
   position: { x: number; y: number }
+  startsConversation: boolean
+  removeQuestionAfterAsked: boolean
   data: {
     questionText?: string
     answers?: Answer[]

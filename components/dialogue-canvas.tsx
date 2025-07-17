@@ -38,7 +38,7 @@ export function DialogueCanvas({
 
   const getArrowPath = (from: { x: number; y: number }, to: { x: number; y: number }) => {
     const arrowLength = 10
-    const arrowAngle = Math.PI / 6 // 30 degrees
+    const arrowAngle = Math.PI / 4   // 45 degrees
     
     // Calculate the direction from source to target
     const dx = to.x - from.x
@@ -80,7 +80,7 @@ export function DialogueCanvas({
             y: fromNode.position.y + 40,
           }
           const toPos = {
-            x: toNode.position.x,
+            x: toNode.position.x - 6,
             y: toNode.position.y + 40,
           }
 

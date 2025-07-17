@@ -29,8 +29,7 @@ export function DialogueNode({
 }: DialogueNodeProps) {
   return (
     <Card
-      className={`absolute w-72 bg-gray-700 border-gray-600 cursor-move ${isSelected ? "ring-2 ring-blue-500" : ""
-        } ${isConnecting ? "ring-2 ring-green-500" : ""}`}
+      className={`absolute w-72 bg-gray-700 border-gray-600 cursor-move ${isSelected ? "ring-2 ring-blue-500" : ""}`}
       style={{
         left: node.position.x,
         top: node.position.y,
@@ -44,7 +43,9 @@ export function DialogueNode({
       }}
     >
       {/* Node Header */}
-      <div className={`bg-blue-600 px-3 py-2 rounded-t-lg`}>
+      <div className={
+        `${node.startsConversation ? "bg-green-600" : "bg-blue-600"} ${node.removeQuestionAfterAsked && !node.startsConversation ? "bg-yellow-600" : ""} px-3 py-2 rounded-t-lg`
+      }>
         <div className="flex items-center justify-between">
           <span className="text-white font-medium text-sm">{node.title}</span>
           <div className="flex space-x-1">
@@ -85,13 +86,13 @@ export function DialogueNode({
         {node.data.answers && node.data.answers.length > 0 && (
           <div className="text-xs text-gray-300">
             <div className="flex items-center justify-between mb-1">
-              <Badge variant="default" className="text-white text-xs">
+              <Badge variant="default" className="text-white text-xs mb-2">
                 {node.data.answers.length} answers
               </Badge>
             </div>
             <div className="space-y-1">
               {node.data.answers.map((answer) => (
-                <div key={answer.id} className="flex items-center justify-between bg-gray-700 p-1 rounded text-xs p-2">
+                <div key={answer.id} className={`flex items-center justify-between bg-gray-700 ${answer.endsCondition ? "border border-red-600" : ""} p-1 rounded text-xs p-2`}>
                   <span className="text-gray-300 truncate">{answer.text}</span>
                 </div>
               ))}

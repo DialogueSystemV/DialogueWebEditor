@@ -67,6 +67,8 @@ export function useDialogueEditor() {
         x: window.innerWidth / 3 + (Math.random() * 50 - 25) + nodes.length,
         y: window.innerHeight / 3 + (Math.random() * 50 - 25) + nodes.length
       },
+      removeQuestionAfterAsked: false,
+      startsConversation: false,
       data: {
         answers: type === "question" ? [] : undefined,
       },
@@ -86,9 +88,9 @@ export function useDialogueEditor() {
     setNodes((prev) =>
       prev.map((node) => {
         if (node.id === nodeId) {
-          // Handle top-level properties like title
-          if (field === "title") {
-            return { ...node, title: value }
+          // Handle top-level properties
+          if (field === "title" || field === "startsConversation" || field === "removeQuestionAfterAsked") {
+            return { ...node, [field]: value }
           }
           // Handle data properties
           return { ...node, data: { ...node.data, [field]: value } }

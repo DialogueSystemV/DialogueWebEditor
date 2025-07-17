@@ -3,10 +3,10 @@
 import React from "react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Plus, Trash2, Play, Square, MessageSquare, Settings } from "lucide-react"
+import { Plus, Trash2, MessageSquare } from "lucide-react"
 import type { NodeData, Answer } from "@/types/dialogue"
 
 interface DialoguePropertiesProps {
@@ -24,13 +24,27 @@ export function DialogueProperties({
 }: DialoguePropertiesProps) {
   return (
     <div className="w-[30rem] bg-gray-800 border-l border-gray-700 p-6 overflow-y-auto">
-      <div className="flex items-center space-x-3 mb-6">
-        <div className="p-2 bg-blue-600 rounded-lg">
-          <MessageSquare className="h-5 w-5 text-white" />
+      <div className="flex items-center mb-6">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-blue-600 rounded-lg">
+            <MessageSquare className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h3 className="text-white font-semibold text-lg">Node Properties</h3>
+            <p className="text-gray-400 text-sm">Configure dialogue node settings</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-white font-semibold text-lg">Node Properties</h3>
-          <p className="text-gray-400 text-sm">Configure dialogue node settings</p>
+        <div className="ml-auto gap-2 flex">
+          {selectedNode.removeQuestionAfterAsked && (
+            <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-300">
+              1 Time Ask
+            </Badge>
+          )}
+          {selectedNode.startsConversation && (
+            <Badge variant="outline" className="text-xs border-green-500 text-green-300">
+              Starter
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -44,6 +58,33 @@ export function DialogueProperties({
             className="bg-gray-700 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500"
             placeholder="Enter node title..."
           />
+        </div>
+
+        <div className="flex flex-col gap-4 bg-gray-750 rounded-lg p-4 border border-gray-700 mb-4">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-gray-300">Remove Question After Asked</label>
+            <Checkbox
+              checked={selectedNode.removeQuestionAfterAsked}
+              onCheckedChange={(checked) => {
+                onUpdateNodeData(selectedNode.id, "removeQuestionAfterAsked", checked === true)
+              }}
+              className="h-5 w-5 rounded border-gray-500 bg-gray-600 text-blue-500 
+                              focus:ring-blue-500 focus:ring-offset-0 hover:bg-gray-500 
+                              transition-colors duration-200"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-gray-300">Starts Conversation</label>
+            <Checkbox
+              checked={selectedNode.startsConversation}
+              onCheckedChange={(checked) => {
+                onUpdateNodeData(selectedNode.id, "startsConversation", checked === true)
+              }}
+              className="h-5 w-5 rounded border-gray-500 bg-gray-600 text-blue-500 
+                              focus:ring-blue-500 focus:ring-offset-0 hover:bg-gray-500 
+                              transition-colors duration-200"
+            />
+          </div>
         </div>
 
         {/* Question Text Section */}
@@ -66,23 +107,28 @@ export function DialogueProperties({
               {(selectedNode.data.answers || []).length} answers
             </Badge>
           </div>
-          
+
           <div className="space-y-4">
             {(selectedNode.data.answers || []).map((answer, index) => (
               <div key={answer.id} className="bg-gray-700 p-4 rounded-lg border border-gray-600">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-medium text-center w-full">{index + 1}</span>
-                    </div>
+                  <div className="flex items-center">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        const updatedAnswers = (selectedNode.data.answers || []).filter(a => a.id !== answer.id)
+                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                      }}
+                      className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10 mr-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                     <span className="text-sm font-medium text-gray-200 truncate max-w-[120px] block">
                       {answer.text || "Untitled Answer"}
                     </span>
                   </div>
                   <div className="flex space-x-2">
-                    <Badge variant="default" className="text-xs bg-green-600 text-green-100">
-                      {answer.probability}%
-                    </Badge>
                     {answer.condition && (
                       <Badge variant="outline" className="text-xs border-orange-500 text-orange-300">
                         Condition
@@ -90,7 +136,7 @@ export function DialogueProperties({
                     )}
                     {answer.endsCondition && (
                       <Badge variant="outline" className="text-xs border-red-500 text-red-300">
-                        Ends
+                        Ender
                       </Badge>
                     )}
                     {answer.action && (
@@ -98,14 +144,9 @@ export function DialogueProperties({
                         Action
                       </Badge>
                     )}
-                    {answer.targetNodeId && (
-                      <Badge variant="outline" className="text-xs border-blue-500 text-blue-300">
-                        Connected
-                      </Badge>
-                    )}
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="text-xs font-medium text-gray-400 block mb-2">Answer Text</label>
@@ -121,47 +162,48 @@ export function DialogueProperties({
                       placeholder="Enter answer text..."
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-medium text-gray-400 block mb-2">Probability (%)</label>
                       <Input
                         type="number"
-                        min="1"
+                        min="0"
                         max="100"
                         value={answer.probability}
                         onChange={(e) => {
+                          const value = e.target.value === '' ? 0 : Number.parseInt(e.target.value);
+                          const probability = isNaN(value) ? 100 / (selectedNode.data.answers?.length || 1) : value;
                           const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                            a.id === answer.id ? { ...a, probability: Number.parseInt(e.target.value) || 1 } : a
+                            a.id === answer.id ? { ...a, probability } : a
                           )
                           onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                         }}
                         className="bg-gray-600 border-gray-500 text-white focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    
-                    <div>
-                      <label className="text-xs font-medium text-gray-400 block mb-2">Ends Condition</label>
-                      <Select
-                        value={answer.endsCondition.toString()}
-                        onValueChange={(value) => {
-                          const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                            a.id === answer.id ? { ...a, endsCondition: value === "true" } : a
-                          )
-                          onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
-                        }}
-                      >
-                        <SelectTrigger className="bg-gray-600 border-gray-500 text-white focus:border-blue-500 focus:ring-blue-500">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="true">True</SelectItem>
-                          <SelectItem value="false">False</SelectItem>
-                        </SelectContent>
-                      </Select>
+
+                    <div className="grid grid-rows-2 gap-3">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <label className="text-sm font-medium text-gray-400">Ends Conversation Abruptly</label>
+                          <Checkbox
+                            checked={answer.endsCondition}
+                            onCheckedChange={(checked) => {
+                              const updatedAnswers = (selectedNode.data.answers || []).map(a =>
+                                a.id === answer.id ? { ...a, endsCondition: checked === true } : a
+                              )
+                              onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                            }}
+                            className="h-5 w-5 rounded border-gray-500 bg-gray-600 text-blue-500 
+                              focus:ring-blue-500 focus:ring-offset-0 hover:bg-gray-500 
+                              transition-colors duration-200"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="text-xs font-medium text-gray-400 block mb-2">Condition (Optional)</label>
                     <Input
@@ -176,7 +218,7 @@ export function DialogueProperties({
                       placeholder="Enter condition logic..."
                     />
                   </div>
-                  
+
                   <div>
                     <label className="text-xs font-medium text-gray-400 block mb-2">Action (Optional)</label>
                     <Input
@@ -191,45 +233,6 @@ export function DialogueProperties({
                       placeholder="Enter action to execute..."
                     />
                   </div>
-                  
-                  <div>
-                    <label className="text-xs font-medium text-gray-400 block mb-2">Target Node</label>
-                    <Select
-                      value={answer.targetNodeId || "none"}
-                      onValueChange={(value) => {
-                        const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                          a.id === answer.id ? { ...a, targetNodeId: value === "none" ? undefined : value } : a
-                        )
-                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
-                      }}
-                    >
-                      <SelectTrigger className="bg-gray-600 border-gray-500 text-white focus:border-blue-500 focus:ring-blue-500">
-                        <SelectValue placeholder="Select target node" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No target</SelectItem>
-                        {nodes.filter(n => n.id !== selectedNode.id).map((node) => (
-                          <SelectItem key={node.id} value={node.id}>
-                            {node.title}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="flex justify-end mt-4">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => {
-                      const updatedAnswers = (selectedNode.data.answers || []).filter(a => a.id !== answer.id)
-                      onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
-                    }}
-                    className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
                 </div>
               </div>
             ))}
@@ -241,11 +244,10 @@ export function DialogueProperties({
                 const newAnswer: Answer = {
                   id: Date.now().toString(),
                   text: "",
-                  probability: 100,
+                  probability: selectedNode.data.answers?.length ? 100 - selectedNode.data.answers.reduce((sum, a) => sum + a.probability, 0) : 100,
                   condition: undefined,
                   endsCondition: false,
                   action: undefined,
-                  targetNodeId: undefined,
                 }
                 const updatedAnswers = [...(selectedNode.data.answers || []), newAnswer]
                 onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
@@ -254,24 +256,6 @@ export function DialogueProperties({
             >
               <Plus className="h-5 w-5 mr-2" />
               Add New Answer
-            </Button>
-          </div>
-        </div>
-
-        {/* Actions Section */}
-        <div className="bg-gray-750 rounded-lg p-4 border border-gray-700">
-          <div className="flex items-center space-x-2 mb-4">
-            <Settings className="h-4 w-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-300">Actions</span>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white h-10">
-              <Play className="h-4 w-4 mr-2" />
-              Test Node
-            </Button>
-            <Button variant="outline" size="sm" className="bg-transparent border-gray-600 text-white hover:bg-gray-700 h-10">
-              <Square className="h-4 w-4 mr-2" />
-              Export
             </Button>
           </div>
         </div>
