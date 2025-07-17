@@ -49,6 +49,15 @@ export function DialogueToolbar({
           <Plus className="h-4 w-4 mr-1" />
           Export
         </Button>
+        <Button
+          variant="secondary"
+          disabled
+          size="sm"
+          className="bg-gray-700 hover:bg-gray-600 text-white"
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Import
+        </Button>
       {connecting && (
         <div className="flex items-center space-x-2 bg-green-900/50 px-3 py-1 rounded-md border border-green-500">
           <span className="text-green-300 text-sm">Connecting...</span>
