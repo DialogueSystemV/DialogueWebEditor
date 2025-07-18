@@ -12,6 +12,7 @@ interface DialogueNodeProps {
   node: NodeData
   isSelected: boolean
   isConnecting: boolean
+  isFirstLinkClick: boolean
   onMouseDown: (e: React.MouseEvent, nodeId: string) => void
   onClick: (nodeId: string, isRightClick?: boolean) => void
   onDelete: (nodeId: string) => void
@@ -22,6 +23,7 @@ export function DialogueNode({
   node,
   isSelected,
   isConnecting,
+  isFirstLinkClick,
   onMouseDown,
   onClick,
   onDelete,
@@ -29,7 +31,7 @@ export function DialogueNode({
 }: DialogueNodeProps) {
   return (
     <Card
-      className={`absolute w-72 bg-gray-700 border-gray-600 cursor-move ${isSelected ? "ring-2 ring-blue-500" : ""}`}
+      className={`absolute w-72 bg-gray-700 border-gray-600 cursor-grab ${isSelected ? "ring-2 ring-blue-500" : ""} ${isFirstLinkClick ? "ring-2 ring-green-500" : ""}`}
       style={{
         left: node.position.x,
         top: node.position.y,

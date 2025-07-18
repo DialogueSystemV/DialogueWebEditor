@@ -10,6 +10,11 @@ export function useDialogueEditor() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [connecting, setConnecting] = useState<{ nodeId: string } | null>(null)
   const [removing, setRemoving] = useState<{ nodeId: string } | null>(null)
+  const [firstLinkClick, setFirstLinkClick] = useState<string | null>(null)
+  const [isPanning, setIsPanning] = useState(false)
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 })
+  const [lastPanPosition, setLastPanPosition] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
   const canvasRef = useRef<HTMLDivElement>(null)
 
   const handleNodeMouseDown = useCallback(
@@ -29,27 +34,71 @@ export function useDialogueEditor() {
     [nodes],
   )
 
+  const handleCanvasMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button === 1 || (e.button === 0 && e.altKey)) { // Middle mouse or Alt+Left click
+      e.preventDefault()
+      e.stopPropagation()
+      setIsPanning(true)
+      setLastPanPosition({ x: e.clientX, y: e.clientY })
+    }
+  }, [])
+
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      if (!draggedNode || !canvasRef.current) return
+      if (isPanning) {
+        const deltaX = e.clientX - lastPanPosition.x
+        const deltaY = e.clientY - lastPanPosition.y
+        
+        setPanOffset(prev => ({
+          x: prev.x + deltaX,
+          y: prev.y + deltaY
+        }))
+        setLastPanPosition({ x: e.clientX, y: e.clientY })
+      } else if (draggedNode && canvasRef.current) {
+        const canvasRect = canvasRef.current.getBoundingClientRect()
+        // Account for pan offset and zoom in the calculation
+        const newX = (e.clientX - canvasRect.left - dragOffset.x - panOffset.x) / zoom
+        const newY = (e.clientY - canvasRect.top - dragOffset.y - panOffset.y) / zoom
 
-      const canvasRect = canvasRef.current.getBoundingClientRect()
-      const newX = e.clientX - canvasRect.left - dragOffset.x
-      const newY = e.clientY - canvasRect.top - dragOffset.y
-
-      setNodes((prev) =>
-        prev.map((node) => (node.id === draggedNode ? { ...node, position: { x: newX, y: newY } } : node)),
-      )
+        setNodes((prev) =>
+          prev.map((node) => (node.id === draggedNode ? { ...node, position: { x: newX, y: newY } } : node)),
+        )
+      }
     },
-    [draggedNode, dragOffset],
+    [isPanning, lastPanPosition, draggedNode, dragOffset, panOffset, zoom],
   )
 
   const handleMouseUp = useCallback(() => {
     setDraggedNode(null)
+    setIsPanning(false)
   }, [])
 
+  const handleWheel = useCallback((e: WheelEvent) => {
+    e.preventDefault()
+    
+    const zoomSpeed = 0.01
+    const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed
+    const newZoom = Math.max(0.1, Math.min(3, zoom + delta))
+    
+    // Simplified zoom to cursor calculation
+    const rect = canvasRef.current?.getBoundingClientRect()
+    if (rect) {
+      const mouseX = e.clientX - rect.left
+      const mouseY = e.clientY - rect.top
+      
+      // Simple zoom to cursor
+      const zoomRatio = newZoom / zoom
+      setPanOffset(prev => ({
+        x: mouseX - (mouseX - prev.x) * zoomRatio,
+        y: mouseY - (mouseY - prev.y) * zoomRatio
+      }))
+    }
+    
+    setZoom(newZoom)
+  }, [zoom])
+
   useEffect(() => {
-    if (draggedNode) {
+    if (draggedNode || isPanning) {
       document.addEventListener("mousemove", handleMouseMove)
       document.addEventListener("mouseup", handleMouseUp)
       return () => {
@@ -57,15 +106,23 @@ export function useDialogueEditor() {
         document.removeEventListener("mouseup", handleMouseUp)
       }
     }
-  }, [draggedNode, handleMouseMove, handleMouseUp])
+  }, [draggedNode, isPanning, handleMouseMove, handleMouseUp])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (canvas) {
+      canvas.addEventListener('wheel', handleWheel, { passive: false })
+      return () => canvas.removeEventListener('wheel', handleWheel)
+    }
+  }, [handleWheel])
 
   const addNode = (type: NodeType) => {
     const newNode: NodeData = {
       id: Date.now().toString(),
       title: "Question Node",
       position: { 
-        x: window.innerWidth / 3 + (Math.random() * 50 - 25) + nodes.length,
-        y: window.innerHeight / 3 + (Math.random() * 50 - 25) + nodes.length
+        x: (window.innerWidth / 3 + (Math.random() * 50 - 25) + nodes.length - panOffset.x) / zoom,
+        y: (window.innerHeight / 3 + (Math.random() * 50 - 25) + nodes.length - panOffset.y) / zoom
       },
       removeQuestionAfterAsked: false,
       startsConversation: false,
@@ -142,21 +199,30 @@ export function useDialogueEditor() {
       }
     }
 
-    if (connecting) {
-      createConnection(connecting.nodeId, nodeId)
-      console.log(connections.length)
-      setConnecting(null)
-    } else {
-      setSelectedNode(nodeId)
-    }
+    // Only select the node, connections are now handled through link button clicks
+    setSelectedNode(nodeId)
   }
 
   const startConnecting = (nodeId: string) => {
-    setConnecting({ nodeId })
+    if (firstLinkClick === null) {
+      // First click - store the node and enter connecting mode
+      setFirstLinkClick(nodeId)
+      setConnecting({ nodeId })
+    } else if (firstLinkClick === nodeId) {
+      // Second click on the same node - cancel the connection
+      setFirstLinkClick(null)
+      setConnecting(null)
+    } else {
+      // Second click on a different node - create the connection
+      createConnection(firstLinkClick, nodeId)
+      setFirstLinkClick(null)
+      setConnecting(null)
+    }
   }
 
   const cancelConnecting = () => {
     setConnecting(null)
+    setFirstLinkClick(null)
   }
 
   const cancelRemoving = () => {
@@ -169,8 +235,13 @@ export function useDialogueEditor() {
     selectedNode,
     connecting,
     removing,
+    firstLinkClick,
+    isPanning,
+    panOffset,
+    zoom,
     canvasRef,
     handleNodeMouseDown,
+    handleCanvasMouseDown,
     handleNodeClick,
     addNode,
     deleteNode,

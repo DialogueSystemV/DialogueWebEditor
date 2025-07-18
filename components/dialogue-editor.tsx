@@ -13,8 +13,13 @@ export function DialogueEditor() {
     selectedNode,
     connecting,
     removing,
+    firstLinkClick,
+    isPanning,
+    panOffset,
+    zoom,
     canvasRef,
     handleNodeMouseDown,
+    handleCanvasMouseDown,
     handleNodeClick,
     addNode,
     deleteNode,
@@ -37,8 +42,13 @@ export function DialogueEditor() {
           connections={connections}
           selectedNode={selectedNode}
           connecting={connecting}
+          firstLinkClick={firstLinkClick}
+          isPanning={isPanning}
+          panOffset={panOffset}
+          zoom={zoom}
           canvasRef={canvasRef}
           onNodeMouseDown={handleNodeMouseDown}
+          onCanvasMouseDown={handleCanvasMouseDown}
           onNodeClick={handleNodeClick}
           onNodeDelete={deleteNode}
           onStartConnecting={startConnecting}
