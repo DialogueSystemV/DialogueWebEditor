@@ -27,7 +27,7 @@ export function DialogueProperties({
   onDeleteNode,
 }: DialoguePropertiesProps) {
   return (
-    <div className="w-[30rem] bg-gray-800 border-l border-gray-700 p-6 overflow-y-auto">
+    <div className="w-[26rem] bg-gray-800 border-l border-gray-700 p-6 overflow-y-auto">
       <div className="flex items-center mb-6">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-blue-600 rounded-lg">

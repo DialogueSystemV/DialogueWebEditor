@@ -111,7 +111,7 @@ export function DialogueToolbar({
               }
             });
           }}
-          className="bg-gray-700 hover:bg-gray-600 h-9 file:text-white text-white border-none file:border-none file:bg-transparent file:text-white hover:cursor-pointer hover:file:cursor-pointer"
+          className="bg-gray-700 hover:bg-gray-600 h-9 file:text-white text-white border-none file:border-none file:bg-transparent file:text-white hover:cursor-pointer hover:file:cursor-pointer w-[14rem]"
         />
 
 
@@ -126,13 +126,13 @@ export function DialogueToolbar({
         </Button>
 
         {connecting && (
-          <div className="flex items-center space-x-2 bg-green-900/50 px-3 py-1 rounded-md border border-green-500">
+          <div className="flex items-center bg-green-900/50 px-3 py-1 rounded-md border border-green-500">
             <span className="text-green-300 text-sm">Click link button on target node to connect</span>
             <Button
               size="sm"
               variant="ghost"
               onClick={onCancelConnecting}
-              className="h-6 w-6 p-0 text-green-300 hover:text-green-200"
+              className="h-6 w-6 px-5 text-green-300 hover:bg-green-900/50"
             >
               <X className="h-3 w-3" />
             </Button>
@@ -140,13 +140,13 @@ export function DialogueToolbar({
         )}
 
         {removing && (
-          <div className="flex items-center space-x-2 bg-red-900/50 px-3 py-1 rounded-md border border-red-500">
-            <span className="text-red-300 text-sm">Right click on target node to remove connections</span>
+          <div className="flex items-center bg-red-900/50 px-3 py-1 rounded-md border border-red-500">
+            <span className="text-red-300 text-sm">Right click on target node to disconnect</span>
             <Button
               size="sm"
               variant="ghost"
               onClick={onCancelRemoving}
-              className="h-6 w-6 p-0 text-red-300 hover:text-red-200"
+              className="h-6 w-6 px-5 text-red-300 hover:bg-red-900/50"
             >
               <X className="h-3 w-3" />
             </Button>
