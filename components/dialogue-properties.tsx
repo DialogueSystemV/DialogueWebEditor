@@ -11,6 +11,7 @@ import type { NodeData, Answer, Connection } from "@/types/dialogue"
 
 interface DialoguePropertiesProps {
   selectedNode: NodeData
+  nodes: NodeData[]
   connections: Connection[]
   onUpdateNodeData: (nodeId: string, field: string, value: any) => void
   onUpdateNodeAnswers: (nodeId: string, answers: Answer[]) => void
@@ -18,6 +19,7 @@ interface DialoguePropertiesProps {
 
 export function DialogueProperties({
   selectedNode,
+  nodes,
   connections,
   onUpdateNodeData,
   onUpdateNodeAnswers,
@@ -258,6 +260,73 @@ export function DialogueProperties({
               <Plus className="h-5 w-5 mr-2" />
               Add New Answer
             </Button>
+          </div>
+        </div>
+
+        {/* Connections Section */}
+        <div className="bg-gray-750 rounded-lg p-4 border border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <label className="text-sm font-medium text-gray-300">Connections</label>
+            <Badge variant="secondary" className="bg-purple-600 text-purple-100">
+              {connections.filter(c => c.from.nodeId === selectedNode.id || c.to.nodeId === selectedNode.id).length} connections
+            </Badge>
+          </div>
+
+          <div className="space-y-3">
+            {/* Outgoing Connections (Green) */}
+            {connections
+              .filter(connection => connection.from.nodeId === selectedNode.id)
+              .map(connection => {
+                const targetNode = nodes?.find(node => node.id === connection.to.nodeId)
+                return (
+                  <div key={connection.id} className="bg-gray-700 p-3 rounded-lg border-l-4 border-green-500">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-200">Outgoing</span>
+                      </div>
+                      <Badge variant="outline" className="text-xs border-green-500 text-green-300">
+                        To: {targetNode?.title || 'Unknown Node'}
+                      </Badge>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-400">
+                      Connection ID: {connection.id}
+                    </div>
+                  </div>
+                )
+              })}
+
+            {/* Incoming Connections (Red) */}
+            {connections
+              .filter(connection => connection.to.nodeId === selectedNode.id)
+              .map(connection => {
+                const sourceNode = nodes?.find(node => node.id === connection.from.nodeId)
+                return (
+                  <div key={connection.id} className="bg-gray-700 p-3 rounded-lg border-l-4 border-red-500">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-200">Incoming</span>
+                      </div>
+                      <Badge variant="outline" className="text-xs border-red-500 text-red-300">
+                        From: {sourceNode?.title || 'Unknown Node'}
+                      </Badge>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-400">
+                      Connection ID: {connection.id}
+                    </div>
+                  </div>
+                )
+              })}
+
+            {/* No Connections Message */}
+            {connections.filter(c => c.from.nodeId === selectedNode.id || c.to.nodeId === selectedNode.id).length === 0 && (
+              <div className="bg-gray-700 p-4 rounded-lg border border-gray-600 text-center">
+                <div className="text-gray-400 text-sm">
+                  No connections found for this node
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

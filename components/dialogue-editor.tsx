@@ -69,6 +69,7 @@ export function DialogueEditor() {
       {selectedNodeData && (
         <DialogueProperties
           selectedNode={selectedNodeData}
+          nodes={nodes}
           connections={connections}
           onUpdateNodeData={updateNodeData}
           onUpdateNodeAnswers={updateNodeAnswers}
