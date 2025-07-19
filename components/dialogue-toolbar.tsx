@@ -4,7 +4,7 @@ import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus, X, HelpCircle, MousePointer, MousePointer2, ZoomIn, Link, Unlink, Move } from "lucide-react"
 import { Connection, NodeData, nodeTypes, type NodeType } from "@/types/dialogue"
-import { Toaster } from "sonner"
+import { toast, Toaster } from "sonner"
 
 interface DialogueToolbarProps {
   onAddNode: (type: NodeType) => void
@@ -16,14 +16,14 @@ interface DialogueToolbarProps {
   onCancelRemoving: () => void
 }
 
-export function DialogueToolbar({ 
-  onAddNode, 
+export function DialogueToolbar({
+  onAddNode,
   nodes,
   connections,
-  connecting, 
-  removing, 
-  onCancelConnecting, 
-  onCancelRemoving 
+  connecting,
+  removing,
+  onCancelConnecting,
+  onCancelRemoving
 }: DialogueToolbarProps) {
   const [showHelp, setShowHelp] = useState(false)
 
@@ -44,9 +44,23 @@ export function DialogueToolbar({
           </Button>
         ))}
 
-        <Button
+        <Button onClick={() => {
+          var allData = {
+            nodes: nodes,
+            connections: connections
+          }
+          const json = JSON.stringify(allData, null, 2)
+          const blob = new Blob([json], { type: "application/json" })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement("a")
+          a.href = url
+          a.download = "dialogue.json"
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+        }}
           variant="secondary"
-          disabled
           size="sm"
           className="bg-gray-700 hover:bg-gray-600 text-white"
         >
@@ -119,7 +133,7 @@ export function DialogueToolbar({
               <X className="h-3 w-3" />
             </Button>
           </div>
-          
+
           <div className="space-y-4">
             {/* Connection Legend */}
             <div className="bg-gray-750 rounded-lg p-3 border border-gray-600">
@@ -151,7 +165,7 @@ export function DialogueToolbar({
                     <span className="text-sm text-gray-400">Alt + Left click + drag</span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <div className="bg-gray-700 px-2 py-1 rounded text-xs">
                     <ZoomIn className="h-4 w-4 text-gray-300" />
@@ -161,7 +175,7 @@ export function DialogueToolbar({
                     <span className="text-sm text-gray-400">Mouse wheel</span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <div className="bg-gray-700 px-2 py-1 rounded text-xs">
                     <MousePointer2 className="h-4 w-4 text-gray-300" />
@@ -171,7 +185,7 @@ export function DialogueToolbar({
                     <span className="text-sm text-gray-400">Left click</span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <div className="bg-gray-700 px-2 py-1 rounded text-xs">
                     <Move className="h-4 w-4 text-gray-300" />
@@ -181,7 +195,7 @@ export function DialogueToolbar({
                     <span className="text-sm text-gray-400">Left click + drag</span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <div className="bg-gray-700 px-2 py-1 rounded text-xs">
                     <Link className="h-4 w-4 text-gray-300" />
@@ -191,14 +205,14 @@ export function DialogueToolbar({
                     <span className="text-sm text-gray-400">Left click the link button on the source node, then left click the link button on the target node</span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <div className="bg-gray-700 px-2 py-1 rounded text-xs">
                     <Unlink className="h-4 w-4 text-gray-300" />
                   </div>
                   <div className="mt-1 flex flex-col">
-                  <span className="text-base">Remove connection </span>
-                  <span className="text-sm text-gray-400">Right click on source node, then right click on target node</span>
+                    <span className="text-base">Remove connection </span>
+                    <span className="text-sm text-gray-400">Right click on source node, then right click on target node</span>
                   </div>
                 </div>
               </div>
