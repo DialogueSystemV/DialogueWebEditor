@@ -340,7 +340,7 @@ export function DialogueProperties({
         >
           <div className="flex flex-col gap-1">
             <div className="flex flex-row items-center justify-center gap-2">
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4 translate-y-[-1px]" />
               <span className="font-medium">Delete Node</span>
             </div>
           </div>
