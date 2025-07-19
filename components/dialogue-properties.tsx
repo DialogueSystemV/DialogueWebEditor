@@ -7,18 +7,18 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Plus, Trash2, MessageSquare } from "lucide-react"
-import type { NodeData, Answer } from "@/types/dialogue"
+import type { NodeData, Answer, Connection } from "@/types/dialogue"
 
 interface DialoguePropertiesProps {
   selectedNode: NodeData
-  nodes: NodeData[]
+  connections: Connection[]
   onUpdateNodeData: (nodeId: string, field: string, value: any) => void
   onUpdateNodeAnswers: (nodeId: string, answers: Answer[]) => void
 }
 
 export function DialogueProperties({
   selectedNode,
-  nodes,
+  connections,
   onUpdateNodeData,
   onUpdateNodeAnswers,
 }: DialoguePropertiesProps) {
@@ -77,6 +77,7 @@ export function DialogueProperties({
             <label className="text-sm font-medium text-gray-300">Starts Conversation</label>
             <Checkbox
               checked={selectedNode.startsConversation}
+              disabled={connections.some(connection => connection.to.nodeId === selectedNode.id)} 
               onCheckedChange={(checked) => {
                 onUpdateNodeData(selectedNode.id, "startsConversation", checked === true)
               }}

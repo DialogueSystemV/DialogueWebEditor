@@ -165,6 +165,10 @@ export function useDialogueEditor() {
   }
 
   const createConnection = (fromNodeId: string, toNodeId: string) => {
+    if(nodes.find((node) => node.id === toNodeId)?.startsConversation) {
+      toast.error("Cannot connect to a node that starts a conversation")
+      return
+    }
     const connectionExists = connections.some((node) => (node.from.nodeId === fromNodeId && node.to.nodeId === toNodeId))
     if (connectionExists) {
       toast.error("Connection already exists")

@@ -29,6 +29,7 @@ export function DialogueToolbar({
 
   return (
     <>
+      <Toaster position="top-center" theme="dark" />
       <div className="absolute top-4 left-4 flex space-x-2">
         {Object.entries(nodeTypes).map(([type, config]) => (
           <Button
