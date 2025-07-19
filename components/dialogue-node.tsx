@@ -4,7 +4,7 @@ import React from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Trash2, Link } from "lucide-react"
+import { Link } from "lucide-react"
 import type { NodeData, Answer } from "@/types/dialogue"
 import { nodeTypes } from "@/types/dialogue"
 
@@ -16,7 +16,6 @@ interface DialogueNodeProps {
   zoom: number
   onMouseDown: (e: React.MouseEvent, nodeId: string) => void
   onClick: (nodeId: string, isRightClick?: boolean) => void
-  onDelete: (nodeId: string) => void
   onStartConnecting: (nodeId: string, answerId: string) => void
 }
 
@@ -28,7 +27,6 @@ export function DialogueNode({
   zoom,
   onMouseDown,
   onClick,
-  onDelete,
   onStartConnecting,
 }: DialogueNodeProps) {
   return (
@@ -55,17 +53,6 @@ export function DialogueNode({
         <div className="flex items-center justify-between">
           <span className="text-white font-medium text-sm">{node.title}</span>
           <div className="flex space-x-1">
-            <Button
-              variant="ghost" 
-              size="icon"
-              className="h-6 w-6 text-white hover:bg-white/20"
-              onClick={(e) => {
-                e.stopPropagation()
-                onDelete(node.id)
-              }}
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
             <Button
               variant="ghost"
               size="icon" 

@@ -16,7 +16,6 @@ interface DialogueCanvasProps {
   onNodeMouseDown: (e: React.MouseEvent, nodeId: string) => void
   onCanvasMouseDown: (e: React.MouseEvent) => void
   onNodeClick: (nodeId: string, isRightClick?: boolean) => void
-  onNodeDelete: (nodeId: string) => void
   onStartConnecting: (nodeId: string, answerId: string) => void
 }
 
@@ -33,7 +32,6 @@ export function DialogueCanvas({
   onNodeMouseDown,
   onCanvasMouseDown,
   onNodeClick,
-  onNodeDelete,
   onStartConnecting,
 }: DialogueCanvasProps) {
   const getConnectionPath = (from: { x: number; y: number }, to: { x: number; y: number }) => {
@@ -78,7 +76,6 @@ export function DialogueCanvas({
           zoom={zoom}
           onMouseDown={onNodeMouseDown}
           onClick={onNodeClick}
-          onDelete={onNodeDelete}
           onStartConnecting={onStartConnecting}
         />
       ))}

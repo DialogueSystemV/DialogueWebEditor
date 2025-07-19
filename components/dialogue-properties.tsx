@@ -15,6 +15,7 @@ interface DialoguePropertiesProps {
   connections: Connection[]
   onUpdateNodeData: (nodeId: string, field: string, value: any) => void
   onUpdateNodeAnswers: (nodeId: string, answers: Answer[]) => void
+  onDeleteNode?: (nodeId: string) => void
 }
 
 export function DialogueProperties({
@@ -23,6 +24,7 @@ export function DialogueProperties({
   connections,
   onUpdateNodeData,
   onUpdateNodeAnswers,
+  onDeleteNode,
 }: DialoguePropertiesProps) {
   return (
     <div className="w-[30rem] bg-gray-800 border-l border-gray-700 p-6 overflow-y-auto">
@@ -79,7 +81,7 @@ export function DialogueProperties({
             <label className="text-sm font-medium text-gray-300">Starts Conversation</label>
             <Checkbox
               checked={selectedNode.startsConversation}
-              disabled={connections.some(connection => connection.to.nodeId === selectedNode.id)} 
+              disabled={connections.some(connection => connection.to.nodeId === selectedNode.id)}
               onCheckedChange={(checked) => {
                 onUpdateNodeData(selectedNode.id, "startsConversation", checked === true)
               }}
@@ -329,6 +331,21 @@ export function DialogueProperties({
             )}
           </div>
         </div>
+
+        {/* Delete Node Button */}
+        <Button
+          variant="destructive"
+          onClick={() => onDeleteNode?.(selectedNode.id)}
+          className="w-full border bg-gray-700 border-red-500 hover:bg-red-700 text-white h-15 flex items-center justify-center flex-col"
+        >
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-row items-center justify-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              <span className="font-medium">Delete Node</span>
+            </div>
+          </div>
+          <span className="text-xs text-gray-300">This action is irreversible and will delete all connections to this node</span>
+        </Button>
       </div>
     </div>
   )

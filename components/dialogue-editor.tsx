@@ -50,7 +50,6 @@ export function DialogueEditor() {
           onNodeMouseDown={handleNodeMouseDown}
           onCanvasMouseDown={handleCanvasMouseDown}
           onNodeClick={handleNodeClick}
-          onNodeDelete={deleteNode}
           onStartConnecting={startConnecting}
         />
 
@@ -73,6 +72,7 @@ export function DialogueEditor() {
           connections={connections}
           onUpdateNodeData={updateNodeData}
           onUpdateNodeAnswers={updateNodeAnswers}
+          onDeleteNode={deleteNode}
         />
       )}
     </div>
