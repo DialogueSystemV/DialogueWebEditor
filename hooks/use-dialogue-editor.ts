@@ -25,8 +25,8 @@ export function useDialogueEditor() {
 
       const rect = e.currentTarget.getBoundingClientRect()
       setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+        x: (e.clientX - rect.left) / zoom,
+        y: (e.clientY - rect.top) / zoom,
       })
       setDraggedNode(nodeId)
       setSelectedNode(nodeId)
@@ -57,8 +57,9 @@ export function useDialogueEditor() {
       } else if (draggedNode && canvasRef.current) {
         const canvasRect = canvasRef.current.getBoundingClientRect()
         // Account for pan offset and zoom in the calculation
-        const newX = (e.clientX - canvasRect.left - dragOffset.x - panOffset.x) / zoom
-        const newY = (e.clientY - canvasRect.top - dragOffset.y - panOffset.y) / zoom
+        // Since nodes are now scaled, we need to account for the scale in drag calculations
+        const newX = (e.clientX - canvasRect.left - dragOffset.x * zoom - panOffset.x) / zoom
+        const newY = (e.clientY - canvasRect.top - dragOffset.y * zoom - panOffset.y) / zoom
 
         setNodes((prev) =>
           prev.map((node) => (node.id === draggedNode ? { ...node, position: { x: newX, y: newY } } : node)),
@@ -121,8 +122,8 @@ export function useDialogueEditor() {
       id: Date.now().toString(),
       title: "Question Node",
       position: { 
-        x: (window.innerWidth / 3 + (Math.random() * 50 - 25) + nodes.length - panOffset.x) / zoom,
-        y: (window.innerHeight / 3 + (Math.random() * 50 - 25) + nodes.length - panOffset.y) / zoom
+        x: (window.innerWidth / 3 + (Math.random() * 50 - 25) - panOffset.x) / zoom,
+        y: (window.innerHeight / 3 + (Math.random() * 50 - 25) - panOffset.y) / zoom
       },
       removeQuestionAfterAsked: false,
       startsConversation: false,

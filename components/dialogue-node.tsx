@@ -13,6 +13,7 @@ interface DialogueNodeProps {
   isSelected: boolean
   isConnecting: boolean
   isFirstLinkClick: boolean
+  zoom: number
   onMouseDown: (e: React.MouseEvent, nodeId: string) => void
   onClick: (nodeId: string, isRightClick?: boolean) => void
   onDelete: (nodeId: string) => void
@@ -24,6 +25,7 @@ export function DialogueNode({
   isSelected,
   isConnecting,
   isFirstLinkClick,
+  zoom,
   onMouseDown,
   onClick,
   onDelete,
@@ -36,6 +38,8 @@ export function DialogueNode({
         left: node.position.x,
         top: node.position.y,
         userSelect: "none",
+        transform: `scale(${zoom})`,
+        transformOrigin: "top left",
       }}
       onMouseDown={(e) => onMouseDown(e, node.id)}
       onClick={() => onClick(node.id)}

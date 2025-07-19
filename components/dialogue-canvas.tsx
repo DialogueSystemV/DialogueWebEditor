@@ -75,6 +75,7 @@ export function DialogueCanvas({
           isSelected={selectedNode === node.id}
           isConnecting={!!connecting}
           isFirstLinkClick={firstLinkClick === node.id}
+          zoom={zoom}
           onMouseDown={onNodeMouseDown}
           onClick={onNodeClick}
           onDelete={onNodeDelete}
@@ -96,7 +97,7 @@ export function DialogueCanvas({
           if (!fromNode || !toNode) return null
 
           const fromPos = {
-            x: (fromNode.position.x + (288 / zoom)) * zoom + panOffset.x,
+            x: (fromNode.position.x + (288)) * zoom + panOffset.x,
             y: (fromNode.position.y + 40) * zoom + panOffset.y,
           }
           const toPos = {
@@ -104,18 +105,18 @@ export function DialogueCanvas({
             y: (toNode.position.y + 40) * zoom + panOffset.y,
           }
 
-          const getHorizontalDirection = (from: { x: number; y: number }, to: { x: number; y: number }) => {
-            if (to.x > from.x) {
-              return;
-            } else if (to.x < from.x) {
-              fromPos.x = (fromNode.position.x + (1 / zoom)) * zoom + panOffset.x
-              fromPos.y = (fromNode.position.y + 40) * zoom + panOffset.y
-              toPos.x = (toNode.position.x + (288 / zoom)) * zoom + panOffset.x
-              toPos.y = (toNode.position.y + 40) * zoom + panOffset.y
-            }
-          };
-          // Calculate positions after zoom and pan transformations
-         getHorizontalDirection(fromPos, toPos)
+        //   const getHorizontalDirection = (from: { x: number; y: number }, to: { x: number; y: number }) => {
+        //     if (to.x > from.x) {
+        //       return;
+        //     } else if (to.x < from.x) {
+        //       fromPos.x = (fromNode.position.x + (1 / zoom)) * zoom + panOffset.x
+        //       fromPos.y = (fromNode.position.y + 40) * zoom + panOffset.y
+        //       toPos.x = (toNode.position.x + (288 / zoom)) * zoom + panOffset.x
+        //       toPos.y = (toNode.position.y + 40) * zoom + panOffset.y
+        //     }
+        //   };
+        //   // Calculate positions after zoom and pan transformations
+        //  getHorizontalDirection(fromPos, toPos)
 
           return (
             <g key={connection.id}>
