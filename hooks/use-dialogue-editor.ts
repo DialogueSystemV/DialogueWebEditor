@@ -77,7 +77,7 @@ export function useDialogueEditor() {
   const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault()
     
-    const zoomSpeed = 0.01
+    const zoomSpeed = 0.05
     const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed
     const newZoom = Math.max(0.1, Math.min(3, zoom + delta))
     
