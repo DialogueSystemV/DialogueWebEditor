@@ -29,6 +29,7 @@ export function DialogueEditor() {
     startConnecting,
     cancelConnecting,
     cancelRemoving,
+    loadNodesAndConnections,
   } = useDialogueEditor()
 
   const selectedNodeData = selectedNode ? nodes.find((n) => n.id === selectedNode) : null
@@ -61,6 +62,7 @@ export function DialogueEditor() {
           removing={removing}
           onCancelConnecting={cancelConnecting}
           onCancelRemoving={cancelRemoving}
+          onLoadData={loadNodesAndConnections}
         />
       </div>
 

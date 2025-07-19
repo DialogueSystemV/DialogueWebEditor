@@ -234,6 +234,12 @@ export function useDialogueEditor() {
     setRemoving(null)
   }
 
+  const loadNodesAndConnections = (newNodes: NodeData[], newConnections: Connection[]) => {
+    setNodes(newNodes)
+    setConnections(newConnections)
+    setSelectedNode(null) // Clear selection when loading new data
+  }
+
   return {
     nodes,
     connections,
@@ -256,5 +262,6 @@ export function useDialogueEditor() {
     startConnecting,
     cancelConnecting,
     cancelRemoving,
+    loadNodesAndConnections,
   }
 } 

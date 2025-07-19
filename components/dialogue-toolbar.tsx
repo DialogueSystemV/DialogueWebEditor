@@ -1,10 +1,11 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus, X, HelpCircle, MousePointer, MousePointer2, ZoomIn, Link, Unlink, Move } from "lucide-react"
 import { Connection, NodeData, nodeTypes, type NodeType } from "@/types/dialogue"
 import { toast, Toaster } from "sonner"
+import { Input } from "./ui/input"
 
 interface DialogueToolbarProps {
   onAddNode: (type: NodeType) => void
@@ -14,6 +15,7 @@ interface DialogueToolbarProps {
   removing: { nodeId: string } | null
   onCancelConnecting: () => void
   onCancelRemoving: () => void
+  onLoadData: (nodes: NodeData[], connections: Connection[]) => void
 }
 
 export function DialogueToolbar({
@@ -23,10 +25,11 @@ export function DialogueToolbar({
   connecting,
   removing,
   onCancelConnecting,
-  onCancelRemoving
+  onCancelRemoving,
+  onLoadData
 }: DialogueToolbarProps) {
   const [showHelp, setShowHelp] = useState(false)
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
   return (
     <>
       <Toaster position="top-center" theme="dark" />
@@ -67,15 +70,50 @@ export function DialogueToolbar({
           <Plus className="h-4 w-4 mr-1" />
           Export
         </Button>
-        <Button
-          variant="secondary"
-          disabled
-          size="sm"
-          className="bg-gray-700 hover:bg-gray-600 text-white"
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          Import
-        </Button>
+        <Input
+          type="file"
+          ref={fileInputRef}
+          accept=".json"
+          onChange={(e) => {
+            const selectedFile = e.target.files?.[0];
+
+            if (!selectedFile) {
+              toast.error('File selection cancelled.');
+              return;
+            }
+            toast('This action will overwrite the current canvas!', {
+              duration: Infinity,
+              cancel: {
+                label: 'Cancel',
+                onClick: () => {
+                  toast.dismiss();
+                  fileInputRef.current!.value = "";
+                }
+              },
+              action: {
+                label: 'Confirm',
+                onClick: () => {
+                  if (selectedFile) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                      try {
+                        const json = JSON.parse(e.target?.result as string);
+                        onLoadData(json.nodes, json.connections);
+                        toast.success('File loaded successfully');
+                        fileInputRef.current!.value = "";
+                      } catch (err) {
+                        toast.error('Invalid file format');
+                      }
+                    };
+                    reader.readAsText(selectedFile);
+                  }
+                }
+              }
+            });
+          }}
+          className="bg-gray-700 hover:bg-gray-600 h-9 file:text-white text-white border-none file:border-none file:bg-transparent file:text-white hover:cursor-pointer hover:file:cursor-pointer"
+        />
+
 
         <Button
           variant="secondary"
