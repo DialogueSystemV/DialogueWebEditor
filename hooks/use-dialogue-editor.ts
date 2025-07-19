@@ -235,6 +235,16 @@ export function useDialogueEditor() {
   }
 
   const loadNodesAndConnections = (newNodes: NodeData[], newConnections: Connection[]) => {
+    // Find a node to center on, defaulting to first node
+    const centerNode = newNodes[0]
+    if (centerNode) {
+      // Center the canvas on this node's position
+      setPanOffset({
+        x: -(centerNode.position.x || 0),
+        y: -(centerNode.position.y || 0)
+      })
+    }
+    
     setNodes(newNodes)
     setConnections(newConnections)
     setSelectedNode(null) // Clear selection when loading new data
