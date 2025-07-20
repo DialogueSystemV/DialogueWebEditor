@@ -52,6 +52,10 @@ export function DialogueToolbar({
             nodes: nodes,
             connections: connections
           }
+          if(!nodes.some(node => node.startsConversation)) {
+            toast.error("No starting node found. Please mark one node as conversation starter.")
+            return
+          }
           const json = JSON.stringify(allData, null, 2)
           const blob = new Blob([json], { type: "application/json" })
           const url = URL.createObjectURL(blob)
