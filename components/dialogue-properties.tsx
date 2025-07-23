@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Plus, Trash2, MessageSquare } from "lucide-react"
+import { Plus, Trash2, MessageSquare, HelpCircle } from "lucide-react"
 import type { NodeData, Answer, Connection } from "@/types/dialogue"
 
 interface DialoguePropertiesProps {
@@ -168,8 +168,8 @@ export function DialogueProperties({
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
+                  <div className="flex flex-row gap-4 items-center">
+                    <div className="flex-1">
                       <label className="text-xs font-medium text-gray-400 block mb-2">Probability (%)</label>
                       <Input
                         type="number"
@@ -188,7 +188,7 @@ export function DialogueProperties({
                       />
                     </div>
 
-                    <div className="grid grid-rows-2 gap-3">
+                    <div className="flex flex-col gap-3 flex-1">
                       <div>
                         <div className="flex items-center justify-between">
                           <label className="text-sm font-medium text-gray-400">Ends Conversation Abruptly</label>
@@ -210,7 +210,17 @@ export function DialogueProperties({
                   </div>
 
                   <div>
-                    <label className="text-xs font-medium text-gray-400 block mb-2">Condition (Optional)</label>
+                    <div className="flex items-center gap-2 mb-2 group relative">
+                      <label className="text-xs font-medium text-gray-400">Condition (Optional)</label>
+                      <div className="relative flex items-center group">
+                        <HelpCircle
+                          className="h-4 w-4 text-gray-400 hover:text-gray-300"
+                        />
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-fit p-2 z-10">
+                          Enter a <strong>public static</strong> C# method that returns a boolean that takes in <strong>0 parameters.</strong> This determines if this answer should be available to be chosen. Leave empty to always show the answer. Expected format: Assembly.Namespace.Class.Method
+                        </div>
+                      </div>
+                    </div>
                     <Input
                       value={answer.condition || ""}
                       onChange={(e) => {
@@ -220,12 +230,22 @@ export function DialogueProperties({
                         onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                       }}
                       className="bg-gray-600 border-gray-500 text-white focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Enter condition logic..."
+                      placeholder="Assembly.Namespace.Class.Method"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-medium text-gray-400 block mb-2">Action (Optional)</label>
+                  <div className="flex items-center gap-2 mb-2 group relative">
+                      <label className="text-xs font-medium text-gray-400">Action (Optional)</label>
+                      <div className="relative flex items-center group">
+                        <HelpCircle
+                          className="h-4 w-4 text-gray-400 hover:text-gray-300"
+                        />
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-fit p-2 z-10">
+                          Enter a <strong>public static</strong> C# method that takes in <strong>0 parameters.</strong> This method will be called when this answer is chosen. Expected format: Assembly.Namespace.Class.Method
+                        </div>
+                      </div>
+                    </div>
                     <Input
                       value={answer.action || ""}
                       onChange={(e) => {
@@ -235,7 +255,7 @@ export function DialogueProperties({
                         onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                       }}
                       className="bg-gray-600 border-gray-500 text-white focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Enter action to execute..."
+                      placeholder="Assembly.Namespace.Class.Method"
                     />
                   </div>
                 </div>
@@ -344,7 +364,7 @@ export function DialogueProperties({
               <span className="font-medium">Delete Node</span>
             </div>
           </div>
-          <span className="text-xs text-gray-300">This action is irreversible and will delete all connections to this node</span>
+          <span className="text-xs text-gray-300 w-11/12 text-wrap">This action is irreversible and will delete all connections to this node</span>
         </Button>
       </div>
     </div>
