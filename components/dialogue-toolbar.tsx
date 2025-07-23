@@ -29,6 +29,7 @@ export function DialogueToolbar({
   onLoadData
 }: DialogueToolbarProps) {
   const [showHelp, setShowHelp] = useState(false)
+  const [helpPage, setHelpPage] = useState(0); // 0: controls, 1: directions
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function exportDialogue() {
@@ -46,6 +47,21 @@ export function DialogueToolbar({
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  }
+
+  // Generic HelpItem component for help panel controls
+  function HelpItem({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
+    return (
+      <div className="flex items-center space-x-3">
+        <div className="bg-gray-700 px-2 py-1 rounded text-xs">
+          {icon}
+        </div>
+        <div className="mt-1 flex flex-col">
+          <span className="text-base">{title}</span>
+          <span className="text-sm text-gray-400">{description}</span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -193,7 +209,7 @@ export function DialogueToolbar({
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold flex items-center">
               <HelpCircle className="h-5 w-5 mr-2 text-blue-400" />
-              Quick Guide
+              {helpPage === 0 ? 'Quick Guide' : 'Directions'}
             </h3>
             <Button
               size="sm"
@@ -205,89 +221,122 @@ export function DialogueToolbar({
             </Button>
           </div>
 
-          <div className="space-y-4">
-            {/* Connection Legend */}
-            <div className="bg-gray-750 rounded-lg p-3 border border-gray-600">
-              <h4 className="text-sm font-medium text-gray-300 mb-3">Connection Colors</h4>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-sm">Green dot = Connection starts from this node</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span className="text-sm">Red dot = Connection goes to this node</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Controls */}
-            <div className="bg-gray-750 rounded-lg p-3 border border-gray-600">
-              <h4 className="text-sm font-medium text-gray-300 mb-3">Controls</h4>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-1 bg-gray-700 px-2 py-1 rounded text-xs">
-                    <span className="text-gray-400 text-sm">Alt</span>
-                    <span className="text-gray-300 text-sm">+</span>
-                    <MousePointer className="h-4 w-4 text-gray-300" />
+          {helpPage === 0 ? (
+            <div className="space-y-4">
+              {/* Connection Legend */}
+              <div className="bg-gray-750 rounded-lg p-3 border border-gray-600">
+                <h4 className="text-sm font-medium text-gray-300 mb-3">Connection Colors</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-sm">Green dot = Connection starts from this node</span>
                   </div>
-                  <div className="mt-1 flex flex-col">
-                    <span className="text-base">Pan canvas</span>
-                    <span className="text-sm text-gray-400">Alt + Left click + drag</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <div className="bg-gray-700 px-2 py-1 rounded text-xs">
-                    <ZoomIn className="h-4 w-4 text-gray-300" />
-                  </div>
-                  <div className="mt-1 flex flex-col">
-                    <span className="text-base">Zoom in/out</span>
-                    <span className="text-sm text-gray-400">Mouse wheel</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <div className="bg-gray-700 px-2 py-1 rounded text-xs">
-                    <MousePointer2 className="h-4 w-4 text-gray-300" />
-                  </div>
-                  <div className="mt-1 flex flex-col">
-                    <span className="text-base">Select node</span>
-                    <span className="text-sm text-gray-400">Left click</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <div className="bg-gray-700 px-2 py-1 rounded text-xs">
-                    <Move className="h-4 w-4 text-gray-300" />
-                  </div>
-                  <div className="mt-1 flex flex-col">
-                    <span className="text-base">Drag node</span>
-                    <span className="text-sm text-gray-400">Left click + drag</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <div className="bg-gray-700 px-2 py-1 rounded text-xs">
-                    <Link className="h-4 w-4 text-gray-300" />
-                  </div>
-                  <div className="mt-1 flex flex-col">
-                    <span className="text-base">Create connection</span>
-                    <span className="text-sm text-gray-400">Left click the link button on the source node, then left click the link button on the target node</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <div className="bg-gray-700 px-2 py-1 rounded text-xs">
-                    <Unlink className="h-4 w-4 text-gray-300" />
-                  </div>
-                  <div className="mt-1 flex flex-col">
-                    <span className="text-base">Remove connection </span>
-                    <span className="text-sm text-gray-400">Right click on source node, then right click on target node</span>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span className="text-sm">Red dot = Connection goes to this node</span>
                   </div>
                 </div>
               </div>
+
+              {/* Controls */}
+              <div className="bg-gray-750 rounded-lg p-3 border border-gray-600">
+                <h4 className="text-sm font-medium text-gray-300 mb-3">Controls</h4>
+                <div className="space-y-3">
+                  <HelpItem
+                    icon={
+                      <div className="flex items-center space-x-1">
+                        <span className="text-gray-400 text-sm">Alt</span>
+                        <span className="text-gray-300 text-sm">+</span>
+                        <MousePointer className="h-4 w-4 text-gray-300" />
+                      </div>
+                    }
+                    title="Pan canvas"
+                    description="Alt + Left click + drag"
+                  />
+                  <HelpItem
+                    icon={<ZoomIn className="h-4 w-4 text-gray-300" />}
+                    title="Zoom in/out"
+                    description="Mouse wheel"
+                  />
+                  <HelpItem
+                    icon={<MousePointer2 className="h-4 w-4 text-gray-300" />}
+                    title="Get node properties"
+                    description="Left click"
+                  />
+                  <HelpItem
+                    icon={<Move className="h-4 w-4 text-gray-300" />}
+                    title="Drag node"
+                    description="Left click + drag"
+                  />
+                  <HelpItem
+                    icon={<Link className="h-4 w-4 text-gray-300" />}
+                    title="Create connection"
+                    description="Left click the link button on the source node, then left click the link button on the target node"
+                  />
+                  <HelpItem
+                    icon={<Unlink className="h-4 w-4 text-gray-300" />}
+                    title="Remove connection "
+                    description="Right click on source node, then right click on target node"
+                  />
+                </div>
+              </div>
             </div>
+          ) : (
+            <div className="space-y-4 overflow-y-auto max-h-[1250px]">
+              <div className="bg-gray-750 rounded-lg p-3 border border-gray-600">
+                <div className="space-y-2">
+                  <h4 className="mb-3 font-semibold">Directions</h4>
+                  <div className="pl-4">
+                    <p className="text-sm" style={{ lineHeight: "1.5" }}>
+                      To use the dialogue system, create a dialogue tree by adding nodes to the canvas using the toolbar. 
+                      Each question node can have a title, value, a list of answers, and some other variables. 
+                      At least one node must be marked as a conversation starter to begin the dialogue. 
+                      You can add answers to nodes via the node properties. 
+                      Answers have a title, value, probability,and a list of variables.
+                      Most variables in both question and answer nodes are self-explanatory, but some are not. 
+                      With these harder to understand variables, there is a helpful tooltip to explain them.
+                      The system follows the tree based on player choices. 
+                      After the starting node is chosen, all connected nodes will be added to the canvas. 
+                      The node chosen is either removed or stays present depending on the `RemoveQuestionAfterAsked` setting.
+                      This process will be repeated until the dialogue ends.
+                    </p>
+                  </div>
+                  <p>
+                    <span className="font-semibold">To summarize:</span>
+                    <span className="pl-2 flex flex-col gap-1 mt-1">
+                      <span className="text-sm">• Step 1: Add nodes to the canvas using the toolbar.</span>
+                      <span className="text-sm">• Step 2: Edit node properties as needed.</span>
+                      <span className="text-sm">• Step 3: Connect nodes to define dialogue flow.</span>
+                      <span className="text-sm">• Step 4: Export dialogue.</span>
+                    <span className="font-semibold">OR</span>
+                    <span className="pl-2 flex flex-col gap-1 mt-1">
+                      <span className="text-sm">• Step 1: Import an existing dialogue file.</span>
+                      <span className="text-sm">• Step 2: Edit as needed.</span>
+                    </span>
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Navigation Buttons */}
+          <div className="flex justify-center gap-4 mt-6">
+            <Button
+              size="sm"
+              variant={helpPage === 0 ? "default" : "secondary"}
+              className={`px-4 text-white ${helpPage === 0 ? "bg-gray-900" : "bg-gray-700 hover:bg-gray-600"}`}
+              onClick={() => setHelpPage(0)}
+            >
+              Controls
+            </Button>
+            <Button
+              size="sm"
+              variant={helpPage === 1 ? "default" : "secondary"}
+              className={`px-4 text-white ${helpPage === 1 ? "bg-gray-900" : "bg-gray-700 hover:bg-gray-600"}`}
+              onClick={() => setHelpPage(1)}
+            >
+              Directions
+            </Button>
           </div>
         </div>
       )}
