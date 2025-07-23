@@ -30,6 +30,24 @@ export function DialogueToolbar({
 }: DialogueToolbarProps) {
   const [showHelp, setShowHelp] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function exportDialogue() {
+    var allData = {
+      nodes: nodes,
+      connections: connections
+    }
+    const json = JSON.stringify(allData, null, 2)
+    const blob = new Blob([json], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "dialogue.json"
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <>
       <Toaster position="top-center" theme="dark" />
@@ -48,24 +66,35 @@ export function DialogueToolbar({
         ))}
 
         <Button onClick={() => {
-          var allData = {
-            nodes: nodes,
-            connections: connections
-          }
-          if(!nodes.some(node => node.startsConversation)) {
-            toast.error("No starting node found. Please mark one node as conversation starter.")
+          if (!nodes.some(node => node.startsConversation)) {
+            toast.error("No starting node found. Please mark one or more nodes as conversation starter.")
             return
           }
-          const json = JSON.stringify(allData, null, 2)
-          const blob = new Blob([json], { type: "application/json" })
-          const url = URL.createObjectURL(blob)
-          const a = document.createElement("a")
-          a.href = url
-          a.download = "dialogue.json"
-          document.body.appendChild(a)
-          a.click()
-          document.body.removeChild(a)
-          URL.revokeObjectURL(url)
+          // Check for any node with no inbound or outbound connections
+          const nodeWithNoConnections = nodes.find(node => {
+            const hasOutbound = connections.some(conn => conn.from.nodeId === node.id);
+            const hasInbound = connections.some(conn => conn.to.nodeId === node.id);
+            return !hasOutbound && !hasInbound;
+          });
+          if (nodeWithNoConnections) {
+            toast(`Node ${nodeWithNoConnections.title} has no inbound or outbound connections. Are you sure you want to continue?`, {
+              duration: Infinity,
+              cancel: {
+                label: 'Cancel',
+                onClick: () => {
+                  toast.dismiss();
+                }
+              },
+              action: {
+                label: 'Confirm',
+                onClick: () => {
+                  exportDialogue()
+                }
+              }
+            });
+          } else {
+            exportDialogue()
+          }
         }}
           variant="secondary"
           size="sm"
