@@ -56,12 +56,32 @@ export function DialogueProperties({
       <div className="space-y-6">
         {/* Title Section */}
         <div className="bg-gray-750 rounded-lg p-4 border border-gray-700">
-          <label className="text-sm font-medium text-gray-300 block mb-3">Node Title</label>
+          <div className="flex items-center gap-2 mb-2 group relative">
+            <label className="text-sm font-medium text-gray-300">Node Title</label>
+            <div className="relative flex items-center group">
+              <HelpCircle
+                className="h-4 w-4 text-gray-400 hover:text-gray-300"
+              />
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[20rem] p-2 z-10">
+                Only used for organization purposes.
+              </div>
+            </div>
+          </div>
           <Input
             value={selectedNode.title}
             onChange={(e) => onUpdateNodeData(selectedNode.id, "title", e.target.value)}
-            className="bg-gray-700 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500"
+            className="bg-gray-700 border-gray-600 text-white focus:border-gray-400 focus:ring-gray-400"
             placeholder="Enter node title..."
+          />
+        </div>
+        <div className="bg-gray-750 rounded-lg p-4 border border-gray-700">
+          <label className="text-sm font-medium text-gray-300 block mb-3">Question Text</label>
+          <Textarea
+            value={selectedNode.data.questionText || ""}
+            onChange={(e) => onUpdateNodeData(selectedNode.id, "questionText", e.target.value)}
+            className="bg-gray-700 border-gray-600 text-white focus:border-gray-400 focus:ring-gray-400 resize-none placeholder:text-gray-400"
+            rows={4}
+            placeholder="Enter the question..."
           />
         </div>
 
@@ -73,8 +93,8 @@ export function DialogueProperties({
               onCheckedChange={(checked) => {
                 onUpdateNodeData(selectedNode.id, "removeQuestionAfterAsked", checked === true)
               }}
-              className="h-5 w-5 rounded border-gray-500 bg-gray-600 text-blue-500 
-                              focus:ring-blue-500 focus:ring-offset-0 hover:bg-gray-500 
+              className="h-5 w-5 rounded border-gray-500 bg-gray-700 text-gray-400 
+                              focus:ring-gray-400 focus:ring-offset-0 hover:bg-gray-500 
                               transition-colors duration-200"
             />
           </div>
@@ -86,8 +106,8 @@ export function DialogueProperties({
               onCheckedChange={(checked) => {
                 onUpdateNodeData(selectedNode.id, "startsConversation", checked === true)
               }}
-              className="h-5 w-5 rounded border-gray-500 bg-gray-600 text-blue-500 
-                              focus:ring-blue-500 focus:ring-offset-0 hover:bg-gray-500 
+              className="h-5 w-5 rounded border-gray-500 bg-gray-700 text-gray-400 
+                              focus:ring-gray-400 focus:ring-offset-0 hover:bg-gray-500 
                               transition-colors duration-200"
             />
           </div>
@@ -137,19 +157,10 @@ export function DialogueProperties({
         </div>
 
         {/* Question Text Section */}
-        <div className="bg-gray-750 rounded-lg p-4 border border-gray-700">
-          <label className="text-sm font-medium text-gray-300 block mb-3">Question Text</label>
-          <Textarea
-            value={selectedNode.data.questionText || ""}
-            onChange={(e) => onUpdateNodeData(selectedNode.id, "questionText", e.target.value)}
-            className="bg-gray-700 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500 resize-none"
-            rows={4}
-            placeholder="Enter the question or dialogue text..."
-          />
-        </div>
+
 
         {/* Answers Section */}
-        <div className="bg-gray-750 rounded-lg p-4 border border-gray-700">
+        <div className="bg-gray-750 rounded-lg p-3 border border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <label className="text-sm font-medium text-gray-300">Answers</label>
             <Badge variant="secondary" className="bg-blue-600 text-blue-100">
@@ -159,25 +170,37 @@ export function DialogueProperties({
 
           <div className="space-y-4">
             {(selectedNode.data.answers || []).map((answer, index) => (
-              <div key={answer.id} className="bg-gray-700 p-4 rounded-lg border border-gray-600">
+              <div key={answer.id} className="bg-gray-750 p-2 rounded-lg border border-gray-600">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        const updatedAnswers = (selectedNode.data.answers || []).filter(a => a.id !== answer.id)
-                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
-                      }}
-                      className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10 mr-2"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm font-medium text-gray-200 truncate max-w-[120px] block">
-                      {answer.text || "Untitled Answer"}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2 group relative">
+                        <label className="text-xs font-medium text-gray-300">Answer Title</label>
+                        <div className="relative flex items-center group">
+                          <HelpCircle
+                            className="h-4 w-4 text-gray-400 hover:text-gray-300"
+                          />
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[20rem] p-2 z-10">
+                            Only used for organization purposes.
+                          </div>
+                        </div>
+                      </div>
+                      <Input
+                        value={answer.title}
+                        onChange={e =>
+                          onUpdateNodeAnswers(
+                            selectedNode.id,
+                            (selectedNode.data.answers || []).map(a =>
+                              a.id === answer.id ? { ...a, title: e.target.value } : a
+                            )
+                          )
+                        }
+                        className="bg-gray-700 border-gray-600 text-white focus:border-gray-400 focus:ring-gray-400"
+                        placeholder="Enter answer title..."
+                      />
+                    </div>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex flex-col gap-2">
                     {answer.condition && (
                       <Badge variant="outline" className="text-xs border-orange-500 text-orange-300">
                         Condition
@@ -198,23 +221,24 @@ export function DialogueProperties({
 
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="text-xs font-medium text-gray-400 block mb-2">Answer Text</label>
-                    <Input
+                    <label className="text-xs font-medium text-gray-300 block mb-2">Answer Text</label>
+                    <Textarea
                       value={answer.text}
+                      rows={3}
                       onChange={(e) => {
                         const updatedAnswers = (selectedNode.data.answers || []).map(a =>
                           a.id === answer.id ? { ...a, text: e.target.value } : a
                         )
                         onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                       }}
-                      className="bg-gray-600 border-gray-500 text-white focus:border-blue-500 focus:ring-blue-500"
+                      className="bg-gray-700 border-gray-500 text-white focus:border-gray-400 focus:ring-gray-400 placeholder:text-gray-400 resize-none"
                       placeholder="Enter answer text..."
                     />
                   </div>
 
                   <div className="flex flex-row gap-4 items-center">
                     <div className="flex-1">
-                      <label className="text-xs font-medium text-gray-400 block mb-2">Probability (%)</label>
+                      <label className="text-xs font-medium text-gray-300 block mb-2">Probability (%)</label>
                       <Input
                         type="number"
                         min="0"
@@ -228,14 +252,14 @@ export function DialogueProperties({
                           )
                           onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                         }}
-                        className="bg-gray-600 border-gray-500 text-white focus:border-blue-500 focus:ring-blue-500"
+                        className="bg-gray-700 border-gray-500 text-white focus:border-gray-400 focus:ring-gray-400"
                       />
                     </div>
 
                     <div className="flex flex-col gap-3 flex-1">
                       <div>
                         <div className="flex items-center justify-between">
-                          <label className="text-sm font-medium text-gray-400">Ends Conversation Abruptly</label>
+                          <label className="text-sm font-medium text-gray-300">Ends Conversation Abruptly</label>
                           <Checkbox
                             checked={answer.endsCondition}
                             onCheckedChange={(checked) => {
@@ -244,8 +268,8 @@ export function DialogueProperties({
                               )
                               onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                             }}
-                            className="h-5 w-5 rounded border-gray-500 bg-gray-600 text-blue-500 
-                              focus:ring-blue-500 focus:ring-offset-0 hover:bg-gray-500 
+                            className="h-5 w-5 rounded border-gray-500 bg-gray-700 text-gray-400 
+                              focus:ring-gray-400 focus:ring-offset-0 hover:bg-gray-500 
                               transition-colors duration-200"
                           />
                         </div>
@@ -255,7 +279,7 @@ export function DialogueProperties({
 
                   <div>
                     <div className="flex items-center gap-2 mb-2 group relative">
-                      <label className="text-xs font-medium text-gray-400">Condition (Optional)</label>
+                      <label className="text-xs font-medium text-gray-300">Condition (Optional)</label>
                       <div className="relative flex items-center group">
                         <HelpCircle
                           className="h-4 w-4 text-gray-400 hover:text-gray-300"
@@ -273,13 +297,13 @@ export function DialogueProperties({
                         )
                         onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                       }}
-                      className="bg-gray-600 border-gray-500 text-white focus:border-blue-500 focus:ring-blue-500"
+                      className="bg-gray-700 border-gray-500 text-white focus:border-gray-400 focus:ring-gray-400"
                       placeholder="Assembly.Namespace.Class.Method"
                     />
                   </div>
 
                   <div>
-                  <div className="flex items-center gap-2 mb-2 group relative">
+                    <div className="flex items-center gap-2 mb-2 group relative">
                       <label className="text-xs font-medium text-gray-400">Action (Optional)</label>
                       <div className="relative flex items-center group">
                         <HelpCircle
@@ -298,10 +322,26 @@ export function DialogueProperties({
                         )
                         onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                       }}
-                      className="bg-gray-600 border-gray-500 text-white focus:border-blue-500 focus:ring-blue-500"
+                      className="bg-gray-700 border-gray-500 text-white focus:border-gray-400 focus:ring-gray-400"
                       placeholder="Assembly.Namespace.Class.Method"
                     />
                   </div>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      const updatedAnswers = (selectedNode.data.answers || []).filter(a => a.id !== answer.id)
+                      onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                    }}
+                    className="w-full border bg-gray-700 border-red-500 hover:bg-red-700 text-white h-20 flex items-center justify-center flex-col"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <div className="flex flex-row items-center justify-center gap-2">
+                        <Trash2 className="h-4 w-4 translate-y-[-1px]" />
+                        <span className="font-medium">Delete Answer</span>
+                      </div>
+                    </div>
+                    <span className="text-xs text-gray-300 w-11/12 text-wrap">This action is irreversible and will delete this answer</span>
+                  </Button>
                 </div>
               </div>
             ))}
@@ -312,6 +352,7 @@ export function DialogueProperties({
               onClick={() => {
                 const newAnswer: Answer = {
                   id: Date.now().toString(),
+                  title: `Answer #${selectedNode.data.answers?.length ? selectedNode.data.answers.length + 1 : 1}`,
                   text: "",
                   probability: selectedNode.data.answers?.length ? 100 - selectedNode.data.answers.reduce((sum, a) => sum + a.probability, 0) : 100,
                   condition: undefined,
@@ -321,7 +362,7 @@ export function DialogueProperties({
                 const updatedAnswers = [...(selectedNode.data.answers || []), newAnswer]
                 onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
               }}
-              className="w-full bg-gray-700 border-gray-600 text-white hover:bg-gray-600 hover:border-gray-500 h-12"
+              className="w-full bg-gray-700 border-gray-600 text-white bg-gray-600 hover:border-gray-500 h-12"
             >
               <Plus className="h-5 w-5 mr-2" />
               Add New Answer
