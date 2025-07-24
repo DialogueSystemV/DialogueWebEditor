@@ -16,6 +16,8 @@ export interface NodeData {
   data: {
     questionText?: string
     answers?: Answer[]
+    questionsToAdd?: string[]
+    questionsToRemove?: string[]
   }
 }
 

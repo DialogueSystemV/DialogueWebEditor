@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Plus, Trash2, MessageSquare, HelpCircle } from "lucide-react"
 import type { NodeData, Answer, Connection } from "@/types/dialogue"
+import { MultiSelect } from "./ui/multi-select"
 
 interface DialoguePropertiesProps {
   selectedNode: NodeData
@@ -88,6 +89,49 @@ export function DialogueProperties({
               className="h-5 w-5 rounded border-gray-500 bg-gray-600 text-blue-500 
                               focus:ring-blue-500 focus:ring-offset-0 hover:bg-gray-500 
                               transition-colors duration-200"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4 bg-gray-750 rounded-lg p-4 border border-gray-700 mb-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-300">Questions to Add</label>
+            <MultiSelect
+              options={nodes
+                .filter(node => node.id !== selectedNode.id)
+                .map(node => ({
+                  label: node.title,
+                  value: node.id
+                }))
+              }
+              selected={
+                (selectedNode.data.questionsToAdd || []).filter(id =>
+                  nodes.some(node => node.id === id)
+                )
+              }
+              onChange={(selected) => {
+                onUpdateNodeData(selectedNode.id, "questionsToAdd", selected.filter(id => nodes.some(node => node.id === id)))
+              }}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-300">Questions to Remove</label>
+            <MultiSelect
+              options={nodes
+                .filter(node => node.id !== selectedNode.id)
+                .map(node => ({
+                  label: node.title,
+                  value: node.id
+                }))
+              }
+              selected={
+                (selectedNode.data.questionsToRemove || []).filter(id =>
+                  nodes.some(node => node.id === id)
+                )
+              }
+              onChange={(selected) => {
+                onUpdateNodeData(selectedNode.id, "questionsToRemove", selected.filter(id => nodes.some(node => node.id === id)))
+              }}
             />
           </div>
         </div>
