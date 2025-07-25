@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Plus, Trash2, MessageSquare, HelpCircle } from "lucide-react"
 import type { NodeData, Answer, Connection } from "@/types/dialogue"
 import { MultiSelect } from "./ui/multi-select"
+import { ConditionInputModal } from "./condition-input-modal"
 
 interface DialoguePropertiesProps {
   selectedNode: NodeData
@@ -285,20 +286,15 @@ export function DialogueProperties({
                           className="h-4 w-4 text-gray-400 hover:text-gray-300"
                         />
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-fit p-2 z-10">
-                          Enter a <strong>public static</strong> C# method that returns a boolean that takes in <strong>0 parameters.</strong> This determines if this answer should be available to be chosen. Leave empty to always show the answer. Expected format: Assembly.Namespace.Class.Method
+                          Enter a <strong>public static</strong> C# method that returns a boolean and takes in <strong>0 parameters.</strong> This determines if this answer should be available to be chosen. Leave all fields empty to always show the answer. Fill in each part separately: Assembly, Namespace, Class, Method.
                         </div>
                       </div>
                     </div>
-                    <Input
-                      value={answer.condition || ""}
-                      onChange={(e) => {
-                        const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                          a.id === answer.id ? { ...a, condition: e.target.value || undefined } : a
-                        )
-                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
-                      }}
-                      className="bg-gray-700 border-gray-500 text-white focus:border-gray-400 focus:ring-gray-400"
-                      placeholder="Assembly.Namespace.Class.Method"
+                    {/* Modal-style 4 input boxes for Assembly, Namespace, Class, Method */}
+                    <ConditionInputModal
+                      answer={answer}
+                      selectedNode={selectedNode}
+                      onUpdateNodeAnswers={onUpdateNodeAnswers}
                     />
                   </div>
 
