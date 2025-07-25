@@ -43,19 +43,19 @@ export function ConditionInputModal({ answer, selectedNode, onUpdateNodeAnswers,
   }
 
   return (
-    <div className="flex flex-col gap-2 bg-gray-700 p-3 rounded-lg border border-gray-600">
+    <div className="flex flex-col gap-2 p-3 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-800/90 to-gray-900/80 backdrop-blur-md shadow-xl">
       <div className="flex gap-2">
         <Input
           placeholder="Assembly"
           value={fields.assembly}
           onChange={e => handleChange('assembly', e.target.value)}
-          className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400"
+          className="bg-gray-900/80 border-gray-700 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400 rounded-md"
         />
         <Input
           placeholder="Namespace"
           value={fields.namespace}
           onChange={e => handleChange('namespace', e.target.value)}
-          className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400"
+          className="bg-gray-900/80 border-gray-700 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400 rounded-md"
         />
       </div>
       <div className="flex gap-2">
@@ -63,13 +63,13 @@ export function ConditionInputModal({ answer, selectedNode, onUpdateNodeAnswers,
           placeholder="Class"
           value={fields.className}
           onChange={e => handleChange('className', e.target.value)}
-          className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400"
+          className="bg-gray-900/80 border-gray-700 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400 rounded-md"
         />
         <Input
           placeholder="Method"
           value={fields.method}
           onChange={e => handleChange('method', e.target.value)}
-          className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400"
+          className="bg-gray-900/80 border-gray-700 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400 rounded-md"
         />
       </div>
       <div className="flex justify-end mt-2">

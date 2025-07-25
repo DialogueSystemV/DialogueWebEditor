@@ -6,6 +6,8 @@ export interface Answer {
   condition?: string
   endsCondition: boolean
   action?: string
+  questionsToAdd?: string[]
+  questionsToRemove?: string[]
 }
 
 export interface NodeData {
@@ -17,8 +19,6 @@ export interface NodeData {
   data: {
     questionText?: string
     answers?: Answer[]
-    questionsToAdd?: string[]
-    questionsToRemove?: string[]
   }
 }
 

@@ -51,7 +51,7 @@ export function MultiSelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between text-left font-normal bg-gray-700 border-gray-700 text-white hover:bg-gray-600 !px-1 !py-5",
+            "w-full justify-between text-left font-normal bg-gray-900 border-gray-600 text-white hover:bg-gray-800 !px-2 !py-5",
             className,
           )}
         >
@@ -63,8 +63,8 @@ export function MultiSelect({
                   return (
                     <Badge
                       variant="secondary"
-                      key={item}
-                      className="mr-1 mb-1 bg-gray-500 text-white hover:bg-gray-400"
+                      key={item}  
+                      className="mr-1 mb-1 bg-gray-700 text-white hover:bg-gray-600"
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
@@ -108,7 +108,7 @@ export function MultiSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full border-none p-0" align="start">
-        <Command className="bg-gray-700">
+        <Command className="bg-gray-800">
           <CommandInput placeholder="Search..." className="text-white placeholder:text-slate-400" />
           <CommandList>
             <CommandEmpty className="text-white p-2 text-sm">No item found.</CommandEmpty>
@@ -117,7 +117,7 @@ export function MultiSelect({
                 <CommandItem
                   key={option.value}
                   onSelect={() => handleSelect(option.value)}
-                  className="!bg-gray-700 !text-white hover:cursor-pointer"
+                  className="!bg-gray-800 !text-white hover:cursor-pointer"
                 >
                   <Check
                     className={cn("mr-2 h-4 w-4", selected.includes(option.value) ? "opacity-100" : "opacity-0")}
