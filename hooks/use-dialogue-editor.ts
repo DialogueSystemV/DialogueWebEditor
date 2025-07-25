@@ -39,6 +39,7 @@ export function useDialogueEditor() {
       e.preventDefault()
       e.stopPropagation()
       setIsPanning(true)
+      setSelectedNode(null)
       setLastPanPosition({ x: e.clientX, y: e.clientY })
     }
   }, [])
