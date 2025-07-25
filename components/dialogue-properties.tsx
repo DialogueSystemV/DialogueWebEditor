@@ -29,7 +29,7 @@ export function DialogueProperties({
   onDeleteNode,
 }: DialoguePropertiesProps) {
   return (
-    <div className="w-[26rem] bg-gray-800 border-l border-gray-700 p-6 overflow-y-auto">
+    <div className="w-[27.5rem] bg-gray-800 border-l border-gray-700 p-6 overflow-y-auto">
       <div className="flex items-center mb-6">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-blue-600 rounded-lg">
@@ -63,7 +63,7 @@ export function DialogueProperties({
               <HelpCircle
                 className="h-4 w-4 text-gray-400 hover:text-gray-300"
               />
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[20rem] p-2 z-10">
+              <div className="absolute bottom-full left-1/2 -translate-x-[30%] mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[19rem] p-2 z-10">
                 Only used for organization purposes.
               </div>
             </div>
@@ -171,7 +171,7 @@ export function DialogueProperties({
 
           <div className="space-y-4">
             {(selectedNode.data.answers || []).map((answer, index) => (
-              <div key={answer.id} className="bg-gray-750 p-2 rounded-lg border border-gray-600">
+              <div key={answer.id} className="bg-[#2c3642] p-3 rounded-lg border border-gray-600">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div>
@@ -181,7 +181,7 @@ export function DialogueProperties({
                           <HelpCircle
                             className="h-4 w-4 text-gray-400 hover:text-gray-300"
                           />
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[20rem] p-2 z-10">
+                          <div className="absolute bottom-full left-1/2 -translate-x-[30%] mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[19rem] p-2 z-10">
                             Only used for organization purposes.
                           </div>
                         </div>
@@ -196,7 +196,7 @@ export function DialogueProperties({
                             )
                           )
                         }
-                        className="bg-gray-700 border-gray-600 text-white focus:border-gray-400 focus:ring-gray-400"
+                        className="bg-gray-800 border-gray-600 text-white focus:border-gray-400 focus:ring-gray-400"
                         placeholder="Enter answer title..."
                       />
                     </div>
@@ -232,7 +232,7 @@ export function DialogueProperties({
                         )
                         onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                       }}
-                      className="bg-gray-700 border-gray-500 text-white focus:border-gray-400 focus:ring-gray-400 placeholder:text-gray-400 resize-none"
+                      className="bg-gray-800 border-gray-500 text-white focus:border-gray-400 focus:ring-gray-400 placeholder:text-gray-400 resize-none"
                       placeholder="Enter answer text..."
                     />
                   </div>
@@ -253,7 +253,7 @@ export function DialogueProperties({
                           )
                           onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                         }}
-                        className="bg-gray-700 border-gray-500 text-white focus:border-gray-400 focus:ring-gray-400"
+                        className="bg-gray-800 border-gray-500 text-white focus:border-gray-400 focus:ring-gray-400"
                       />
                     </div>
 
@@ -285,7 +285,7 @@ export function DialogueProperties({
                         <HelpCircle
                           className="h-4 w-4 text-gray-400 hover:text-gray-300"
                         />
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-fit p-2 z-10">
+                        <div className="absolute bottom-full left-1/2 -translate-x-[40%] mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[19rem] p-2 z-10">
                           Enter a <strong>public static</strong> C# method that returns a boolean and takes in <strong>0 parameters.</strong> This determines if this answer should be available to be chosen. Leave all fields empty to always show the answer. Fill in each part separately: Assembly, Namespace, Class, Method.
                         </div>
                       </div>
@@ -295,31 +295,29 @@ export function DialogueProperties({
                       answer={answer}
                       selectedNode={selectedNode}
                       onUpdateNodeAnswers={onUpdateNodeAnswers}
+                      fieldType="condition"
                     />
                   </div>
 
+
                   <div>
                     <div className="flex items-center gap-2 mb-2 group relative">
-                      <label className="text-xs font-medium text-gray-400">Action (Optional)</label>
+                      <label className="text-xs font-medium text-gray-300">Action (Optional)</label>
                       <div className="relative flex items-center group">
                         <HelpCircle
                           className="h-4 w-4 text-gray-400 hover:text-gray-300"
                         />
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-fit p-2 z-10">
-                          Enter a <strong>public static</strong> C# method that takes in <strong>0 parameters.</strong> This method will be called when this answer is chosen. Expected format: Assembly.Namespace.Class.Method
+                        <div className="absolute bottom-full left-1/2 -translate-x-[35%] mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[19rem] p-2 z-10">
+                          Enter a <strong>public static</strong> C# method that takes in <strong>0 parameters.</strong> This method will be called when this answer is chosen. Leave all fields empty to do nothing. Fill in each part separately: Assembly, Namespace, Class, Method.
                         </div>
                       </div>
                     </div>
-                    <Input
-                      value={answer.action || ""}
-                      onChange={(e) => {
-                        const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                          a.id === answer.id ? { ...a, action: e.target.value || undefined } : a
-                        )
-                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
-                      }}
-                      className="bg-gray-700 border-gray-500 text-white focus:border-gray-400 focus:ring-gray-400"
-                      placeholder="Assembly.Namespace.Class.Method"
+                    {/* Modal-style 4 input boxes for Assembly, Namespace, Class, Method */}
+                    <ConditionInputModal
+                      answer={answer}
+                      selectedNode={selectedNode}
+                      onUpdateNodeAnswers={onUpdateNodeAnswers}
+                      fieldType="action"
                     />
                   </div>
                   <Button
@@ -358,7 +356,7 @@ export function DialogueProperties({
                 const updatedAnswers = [...(selectedNode.data.answers || []), newAnswer]
                 onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
               }}
-              className="w-full bg-gray-700 border-gray-600 text-white bg-gray-600 hover:border-gray-500 h-12"
+                className="text-white hover:text-white bg-gray-700 hover:bg-gray-600 border-gray-500 w-full h-12"
             >
               <Plus className="h-5 w-5 mr-2" />
               Add New Answer
