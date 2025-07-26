@@ -4,7 +4,7 @@ import React from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Link } from "lucide-react"
+import { Link, CopyPlus } from "lucide-react"
 import type { NodeData, Answer } from "@/types/dialogue"
 import { nodeTypes } from "@/types/dialogue"
 
@@ -17,6 +17,7 @@ interface DialogueNodeProps {
   onMouseDown: (e: React.MouseEvent, nodeId: string) => void
   onClick: (nodeId: string, isRightClick?: boolean) => void
   onStartConnecting: (nodeId: string, answerId: string) => void
+  onCloneNode: (nodeId: string) => void
 }
 
 export function DialogueNode({
@@ -28,6 +29,7 @@ export function DialogueNode({
   onMouseDown,
   onClick,
   onStartConnecting,
+  onCloneNode,
 }: DialogueNodeProps) {
   return (
     <Card
@@ -59,8 +61,21 @@ export function DialogueNode({
               className="h-6 w-6 text-white hover:bg-white/20"
               onClick={(e) => {
                 e.stopPropagation()
+                onCloneNode(node.id)
+              }}
+              title="Clone node"
+            >
+              <CopyPlus className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon" 
+              className="h-6 w-6 text-white hover:bg-white/20"
+              onClick={(e) => {
+                e.stopPropagation()
                 onStartConnecting(node.id, "null")
               }}
+              title="Connect node"
             >
               <Link className="h-3 w-3" />
             </Button>

@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Plus, X, HelpCircle, MousePointer, MousePointer2, ZoomIn, Link, Unlink, Move } from "lucide-react"
+import { Plus, X, HelpCircle, MousePointer, MousePointer2, ZoomIn, Link, Unlink, Move, CopyPlus } from "lucide-react"
 import { Connection, NodeData, nodeTypes, type NodeType } from "@/types/dialogue"
 import { toast, Toaster } from "sonner"
 import { Input } from "./ui/input"
@@ -305,6 +305,11 @@ export function DialogueToolbar({
                     icon={<Unlink className="h-4 w-4 text-gray-300" />}
                     title="Remove connection "
                     description="Right click on source node, then right click on target node"
+                  />
+                  <HelpItem
+                    icon={<CopyPlus className="h-4 w-4 text-gray-300" />}
+                    title="Clone node"
+                    description="Click the copy button on any node to create a duplicate"
                   />
                 </div>
               </div>

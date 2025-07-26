@@ -143,6 +143,35 @@ export function useDialogueEditor() {
     }
   }
 
+  const cloneNode = (nodeId: string) => {
+    const originalNode = nodes.find((n) => n.id === nodeId)
+    if (!originalNode) return
+
+    // Create a deep copy of the node data, including consequences
+    const clonedNode: NodeData = {
+      ...originalNode,
+      id: Date.now().toString(),
+      title: `${originalNode.title} (Copy)`,
+      position: {
+        x: originalNode.position.x + 50,
+        y: originalNode.position.y + 50,
+      },
+      data: {
+        ...originalNode.data,
+        answers: originalNode.data.answers?.map((answer, index) => ({
+          ...answer,
+          id: (Date.now() + index).toString() + Math.random().toString(36).substr(2, 9),
+          // Clone consequences if they exist
+          consequences: undefined
+        }))
+      }
+    }
+
+    setNodes((prev) => [...prev, clonedNode])
+    setSelectedNode(clonedNode.id)
+    toast.success("Node cloned successfully")
+  }
+
   const updateNodeData = (nodeId: string, field: string, value: any) => {
     setNodes((prev) =>
       prev.map((node) => {
@@ -267,6 +296,7 @@ export function useDialogueEditor() {
     handleNodeClick,
     addNode,
     deleteNode,
+    cloneNode,
     deleteConnection,
     updateNodeData,
     updateNodeAnswers,
