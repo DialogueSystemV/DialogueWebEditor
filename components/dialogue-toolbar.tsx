@@ -33,9 +33,37 @@ export function DialogueToolbar({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function exportDialogue() {
+    // Extract consequences from all answers
+    const allConsequences: any[] = []
+    
+    nodes.forEach(node => {
+      if (node.data.answers) {
+        node.data.answers.forEach(answer => {
+          if (answer.consequences) {
+            allConsequences.push({
+              consequences: answer.consequences
+            })
+          }
+        })
+      }
+    })
+
+    // Create nodes without consequences
+    const nodesWithoutConsequences = nodes.map(node => ({
+      ...node,
+      data: {
+        ...node.data,
+        answers: node.data.answers?.map(answer => {
+          const { consequences, ...answerWithoutConsequences } = answer
+          return answerWithoutConsequences
+        })
+      }
+    }))
+
     var allData = {
-      nodes: nodes,
-      connections: connections
+      nodes: nodesWithoutConsequences,
+      connections: connections,
+      consequences: allConsequences
     }
     const json = JSON.stringify(allData, null, 2)
     const blob = new Blob([json], { type: "application/json" })
