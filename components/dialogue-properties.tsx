@@ -256,7 +256,7 @@ export function DialogueProperties({
                     />
                   </div>
                 </div>
-                <label className="text-xs text-gray-300 pl-4 mb-2 font-medium">Consequences</label>
+                {/*<label className="text-xs text-gray-300 pl-4 mb-2 font-medium">Consequences</label>
                 <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 flex flex-col gap-4 w-11/12 mb-3 mx-auto">
                   <div className="flex flex-col gap-2">
                     <label className="text-sm text-gray-300">Questions to Add</label>
@@ -283,8 +283,8 @@ export function DialogueProperties({
                         onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                       }}
                     />
-                  </div>
-                </div>
+                  </div> 
+                </div>*/}
               </Card>
             ))}
 
