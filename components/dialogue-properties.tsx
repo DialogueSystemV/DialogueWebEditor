@@ -262,10 +262,17 @@ export function DialogueProperties({
                     <label className="text-sm text-gray-300">Questions to Add</label>
                     <MultiSelect
                       options={nodes.filter(node => node.id !== selectedNode.id).map(node => ({ label: node.title, value: node.id }))}
-                      selected={(answer.questionsToAdd || []).filter((id: string) => nodes.some(node => node.id === id))}
+                      selected={(answer.consequences?.questionsToAdd || []).filter((id: string) => nodes.some(node => node.id === id))}
                       onChange={(selected) => {
                         const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                          a.id === answer.id ? { ...a, questionsToAdd: selected.filter(id => nodes.some(node => node.id === id)) } : a
+                          a.id === answer.id ? { 
+                            ...a, 
+                            consequences: {
+                              ...a.consequences,
+                              answerNodeId: answer.id,
+                              questionsToAdd: selected.filter(id => nodes.some(node => node.id === id))
+                            }
+                          } : a
                         )
                         onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                       }}
@@ -275,15 +282,22 @@ export function DialogueProperties({
                     <label className="text-sm text-gray-300">Questions to Remove</label>
                     <MultiSelect
                       options={nodes.filter(node => node.id !== selectedNode.id).map(node => ({ label: node.title, value: node.id }))}
-                      selected={(answer.questionsToRemove || []).filter((id: string) => nodes.some(node => node.id === id))}
+                      selected={(answer.consequences?.questionsToRemove || []).filter((id: string) => nodes.some(node => node.id === id))}
                       onChange={(selected) => {
                         const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                          a.id === answer.id ? { ...a, questionsToRemove: selected.filter(id => nodes.some(node => node.id === id)) } : a
+                          a.id === answer.id ? { 
+                            ...a, 
+                            consequences: {
+                              ...a.consequences,
+                              answerNodeId: answer.id,
+                              questionsToRemove: selected.filter(id => nodes.some(node => node.id === id))
+                            }
+                          } : a
                         )
                         onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                       }}
                     />
-                  </div>
+                  </div> 
                 </div>
               </Card>
             ))}
@@ -300,6 +314,11 @@ export function DialogueProperties({
                   condition: undefined,
                   endsCondition: false,
                   action: undefined,
+                  consequences: {
+                    answerNodeId: "",
+                    questionsToAdd: [],
+                    questionsToRemove: []
+                  }
                 }
                 const updatedAnswers = [...(selectedNode.data.answers || []), newAnswer]
                 onUpdateNodeAnswers(selectedNode.id, updatedAnswers)

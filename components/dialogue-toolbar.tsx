@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Plus, X, HelpCircle, MousePointer, MousePointer2, ZoomIn, Link, Unlink, Move } from "lucide-react"
+import { Plus, X, HelpCircle, MousePointer, MousePointer2, ZoomIn, Link, Unlink, Move, CopyPlus } from "lucide-react"
 import { Connection, NodeData, nodeTypes, type NodeType } from "@/types/dialogue"
 import { toast, Toaster } from "sonner"
 import { Input } from "./ui/input"
@@ -33,9 +33,37 @@ export function DialogueToolbar({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function exportDialogue() {
+    // Extract consequences from all answers
+    const allConsequences: any[] = []
+    
+    nodes.forEach(node => {
+      if (node.data.answers) {
+        node.data.answers.forEach(answer => {
+          if (answer.consequences) {
+            allConsequences.push({
+              consequences: answer.consequences
+            })
+          }
+        })
+      }
+    })
+
+    // Create nodes without consequences
+    const nodesWithoutConsequences = nodes.map(node => ({
+      ...node,
+      data: {
+        ...node.data,
+        answers: node.data.answers?.map(answer => {
+          const { consequences, ...answerWithoutConsequences } = answer
+          return answerWithoutConsequences
+        })
+      }
+    }))
+
     var allData = {
-      nodes: nodes,
-      connections: connections
+      nodes: nodesWithoutConsequences,
+      connections: connections,
+      consequences: allConsequences
     }
     const json = JSON.stringify(allData, null, 2)
     const blob = new Blob([json], { type: "application/json" })
@@ -205,7 +233,7 @@ export function DialogueToolbar({
 
       {/* Help Panel */}
       {showHelp && (
-        <div className="absolute top-4 right-4 bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-md text-white shadow-xl z-50">
+        <div className="absolute top-4 right-4 bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-md text-white shadow-xl z-50 max-h-[80vh] overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold flex items-center">
               <HelpCircle className="h-5 w-5 mr-2 text-blue-400" />
@@ -278,6 +306,11 @@ export function DialogueToolbar({
                     title="Remove connection "
                     description="Right click on source node, then right click on target node"
                   />
+                  <HelpItem
+                    icon={<CopyPlus className="h-4 w-4 text-gray-300" />}
+                    title="Clone node"
+                    description="Click the copy button on any node to create a duplicate"
+                  />
                 </div>
               </div>
             </div>
@@ -287,19 +320,40 @@ export function DialogueToolbar({
                 <div className="space-y-2">
                   <h4 className="mb-3 font-semibold">Directions</h4>
                   <div className="pl-4">
-                    <p className="text-sm" style={{ lineHeight: "1.5" }}>
-                      To use the dialogue system, create a dialogue tree by adding nodes to the canvas using the toolbar. 
-                      Each question node can have a title, value, a list of answers, and some other variables. 
-                      At least one node must be marked as a conversation starter to begin the dialogue. 
-                      You can add answers to nodes via the node properties. 
-                      Answers have a title, value, probability,and a list of variables.
-                      Most variables in both question and answer nodes are self-explanatory, but some are not. 
-                      With these harder to understand variables, there is a helpful tooltip to explain them.
-                      The system follows the tree based on player choices. 
-                      After the starting node is chosen, all connected nodes will be added to the canvas. 
-                      The node chosen is either removed or stays present depending on the `RemoveQuestionAfterAsked` setting.
-                      This process will be repeated until the dialogue ends.
-                    </p>
+                    <div className="space-y-3 text-sm">
+                      <p>
+                        Create interactive dialogue trees by connecting nodes that represent conversations and choices.
+                      </p>
+                      
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-gray-300">Key Components:</h5>
+                        <ul className="pl-4 space-y-1">
+                          <li>• <strong>Question Nodes:</strong> Contain dialogue text and multiple answer options</li>
+                          <li>• <strong>Answer Options:</strong> Possible answer choices with titles, values, and probabilities</li>
+                          <li>• <strong>Connections:</strong> Define the flow between questions and answers</li>
+                        </ul>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-gray-300">Getting Started:</h5>
+                        <ul className="pl-4 space-y-1">
+                          <li>• Mark at least one node as a "conversation starter"</li>
+                          <li>• Add answers to nodes through the properties panel</li>
+                          <li>• Connect nodes to create dialogue flow</li>
+                          <li>• Use tooltips for help with complex variables</li>
+                        </ul>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-gray-300">How It Works:</h5>
+                        <ul className="pl-4 space-y-1">
+                          <li>• Players see the starting question</li>
+                          <li>• Their choice determines which connected question node appears next</li>
+                          <li>• Nodes can be removed or kept based on settings</li>
+                          <li>• Process continues until dialogue ends</li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                   <p>
                     <span className="font-semibold">To summarize:</span>
