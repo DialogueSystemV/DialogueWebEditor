@@ -233,7 +233,7 @@ export function DialogueToolbar({
 
       {/* Help Panel */}
       {showHelp && (
-        <div className="absolute top-4 right-4 bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-md text-white shadow-xl z-50">
+        <div className="absolute top-4 right-4 bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-md text-white shadow-xl z-50 max-h-[80vh] overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold flex items-center">
               <HelpCircle className="h-5 w-5 mr-2 text-blue-400" />
@@ -320,19 +320,40 @@ export function DialogueToolbar({
                 <div className="space-y-2">
                   <h4 className="mb-3 font-semibold">Directions</h4>
                   <div className="pl-4">
-                    <p className="text-sm" style={{ lineHeight: "1.5" }}>
-                      To use the dialogue system, create a dialogue tree by adding nodes to the canvas using the toolbar. 
-                      Each question node can have a title, value, a list of answers, and some other variables. 
-                      At least one node must be marked as a conversation starter to begin the dialogue. 
-                      You can add answers to nodes via the node properties. 
-                      Answers have a title, value, probability,and a list of variables.
-                      Most variables in both question and answer nodes are self-explanatory, but some are not. 
-                      With these harder to understand variables, there is a helpful tooltip to explain them.
-                      The system follows the tree based on player choices. 
-                      After the starting node is chosen, all connected nodes will be added to the canvas. 
-                      The node chosen is either removed or stays present depending on the `RemoveQuestionAfterAsked` setting.
-                      This process will be repeated until the dialogue ends.
-                    </p>
+                    <div className="space-y-3 text-sm">
+                      <p>
+                        Create interactive dialogue trees by connecting nodes that represent conversations and choices.
+                      </p>
+                      
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-gray-300">Key Components:</h5>
+                        <ul className="pl-4 space-y-1">
+                          <li>• <strong>Question Nodes:</strong> Contain dialogue text and multiple answer options</li>
+                          <li>• <strong>Answer Options:</strong> Player choices with titles, values, and probabilities</li>
+                          <li>• <strong>Connections:</strong> Define the flow between questions and answers</li>
+                        </ul>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-gray-300">Getting Started:</h5>
+                        <ul className="pl-4 space-y-1">
+                          <li>• Mark at least one node as a "conversation starter"</li>
+                          <li>• Add answers to nodes through the properties panel</li>
+                          <li>• Connect nodes to create dialogue flow</li>
+                          <li>• Use tooltips for help with complex variables</li>
+                        </ul>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-gray-300">How It Works:</h5>
+                        <ul className="pl-4 space-y-1">
+                          <li>• Players see the starting question</li>
+                          <li>• Their choice determines which connected question node appears next</li>
+                          <li>• Nodes can be removed or kept based on settings</li>
+                          <li>• Process continues until dialogue ends</li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                   <p>
                     <span className="font-semibold">To summarize:</span>
