@@ -329,7 +329,7 @@ export function DialogueToolbar({
                         <h5 className="font-medium text-gray-300">Key Components:</h5>
                         <ul className="pl-4 space-y-1">
                           <li>• <strong>Question Nodes:</strong> Contain dialogue text and multiple answer options</li>
-                          <li>• <strong>Answer Options:</strong> Player choices with titles, values, and probabilities</li>
+                          <li>• <strong>Answer Options:</strong> Possible answer choices with titles, values, and probabilities</li>
                           <li>• <strong>Connections:</strong> Define the flow between questions and answers</li>
                         </ul>
                       </div>
