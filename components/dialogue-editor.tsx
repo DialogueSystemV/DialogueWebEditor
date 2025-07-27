@@ -23,6 +23,7 @@ export function DialogueEditor() {
     handleNodeClick,
     addNode,
     deleteNode,
+    cloneNode,
     deleteConnection,
     updateNodeData,
     updateNodeAnswers,
@@ -52,6 +53,7 @@ export function DialogueEditor() {
           onCanvasMouseDown={handleCanvasMouseDown}
           onNodeClick={handleNodeClick}
           onStartConnecting={startConnecting}
+          onCloneNode={cloneNode}
         />
 
         <DialogueToolbar

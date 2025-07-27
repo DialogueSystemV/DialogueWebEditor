@@ -1,10 +1,18 @@
+export interface Consequences {
+  answerNodeId: string
+  questionsToAdd?: string[]
+  questionsToRemove?: string[]
+}
+
 export interface Answer {
   id: string
+  title: string
   text: string
   probability: number
   condition?: string
   endsCondition: boolean
   action?: string
+  consequences?: Consequences
 }
 
 export interface NodeData {

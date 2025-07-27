@@ -17,6 +17,7 @@ interface DialogueCanvasProps {
   onCanvasMouseDown: (e: React.MouseEvent) => void
   onNodeClick: (nodeId: string, isRightClick?: boolean) => void
   onStartConnecting: (nodeId: string, answerId: string) => void
+  onCloneNode: (nodeId: string) => void
 }
 
 export function DialogueCanvas({
@@ -33,6 +34,7 @@ export function DialogueCanvas({
   onCanvasMouseDown,
   onNodeClick,
   onStartConnecting,
+  onCloneNode,
 }: DialogueCanvasProps) {
   const getConnectionPath = (from: { x: number; y: number }, to: { x: number; y: number }) => {
     const dx = to.x - from.x
@@ -77,6 +79,7 @@ export function DialogueCanvas({
           onMouseDown={onNodeMouseDown}
           onClick={onNodeClick}
           onStartConnecting={onStartConnecting}
+          onCloneNode={onCloneNode}
         />
       ))}
 
