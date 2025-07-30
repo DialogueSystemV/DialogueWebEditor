@@ -231,11 +231,17 @@ export function DialogueProperties({
                         </div>
                       </div>
                     </div>
-                    <ConditionInputModal
-                      answer={answer}
-                      selectedNode={selectedNode}
-                      onUpdateNodeAnswers={onUpdateNodeAnswers}
-                      fieldType="condition"
+                    <Input
+                      type="text"
+                      placeholder="Assembly.Namespace.Class.Method"
+                      value={answer.condition || ""}
+                      onChange={e => {
+                        const updatedAnswers = (selectedNode.data.answers || []).map(a =>
+                          a.id === answer.id ? { ...a, condition: e.target.value } : a
+                        )
+                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                      }}
+                      className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 w-full"
                     />
                   </div>
                   <div>
@@ -248,11 +254,17 @@ export function DialogueProperties({
                         </div>
                       </div>
                     </div>
-                    <ConditionInputModal
-                      answer={answer}
-                      selectedNode={selectedNode}
-                      onUpdateNodeAnswers={onUpdateNodeAnswers}
-                      fieldType="action"
+                    <Input
+                      type="text"
+                      placeholder="Assembly.Namespace.Class.Method"
+                      value={answer.action || ""}
+                      onChange={e => {
+                        const updatedAnswers = (selectedNode.data.answers || []).map(a =>
+                          a.id === answer.id ? { ...a, action: e.target.value } : a
+                        )
+                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                      }}
+                      className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 w-full"
                     />
                   </div>
                 </div>
