@@ -6,12 +6,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Plus, Trash2, MessageSquare, HelpCircle } from "lucide-react"
+import { Plus, Trash2, MessageSquare, HelpCircle, ChevronsUpDown } from "lucide-react"
 import type { NodeData, Answer, Connection } from "@/types/dialogue"
 import { MultiSelect } from "./ui/multi-select"
 import { ConditionInputModal } from "./condition-input-modal"
 import { Card } from "./ui/card"
-
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
 interface DialoguePropertiesProps {
   selectedNode: NodeData
   nodes: NodeData[]
@@ -123,195 +123,211 @@ export function DialogueProperties({
 
           <div className="space-y-6">
             {(selectedNode.data.answers || []).map((answer, index) => (
-              <Card key={answer.id} className="bg-gray-800 border border-gray-600 shadow-md hover:shadow-lg transition-shadow p-0">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b border-gray-600">
-                  <div className="flex items-center gap-3 w-full">
-                    <Input
-                      value={answer.title}
-                      onChange={e =>
-                        onUpdateNodeAnswers(
-                          selectedNode.id,
-                          (selectedNode.data.answers || []).map(a =>
-                            a.id === answer.id ? { ...a, title: e.target.value } : a
+              <Collapsible
+                key={answer.id}
+                defaultOpen={false}
+                className="mb-4"
+              >
+                <CollapsibleTrigger asChild>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b border-gray-600 bg-gray-800 cursor-pointer select-none rounded-t-lg">
+                    <div className="flex items-center gap-3 w-full">
+                      <span className="mr-2 flex items-center justify-center rounded hover:bg-gray-700 transition-colors h-7 w-7">
+                        <Button variant="ghost" size="icon" className="size-8">
+                          <ChevronsUpDown className="h-4 w-4 text-gray-400" />
+                        </Button>
+                      </span>
+                      <Input
+                        value={answer.title}
+                        onChange={e =>
+                          onUpdateNodeAnswers(
+                            selectedNode.id,
+                            (selectedNode.data.answers || []).map(a =>
+                              a.id === answer.id ? { ...a, title: e.target.value } : a
+                            )
                           )
-                        )
-                      }
-                      className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 text-base font-semibold placeholder:text-gray-500 w-full"
-                      placeholder="Answer title..."
-                    />
-                    <div className="flex gap-1 items-center">
-                      {answer.condition && (
-                        <span title="Condition"><HelpCircle className="h-4 w-4 text-orange-400" /></span>
-                      )}
-                      {answer.endsCondition && (
-                        <span title="Ends Conversation"><svg className="h-4 w-4 text-red-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></span>
-                      )}
-                      {answer.action && (
-                        <span title="Action"><svg className="h-4 w-4 text-purple-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h8" /></svg></span>
-                      )}
+                        }
+                        className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 text-base font-semibold placeholder:text-gray-500 w-full"
+                        placeholder="Answer title..."
+                        onClick={e => e.stopPropagation()}
+                      />
+                      <div className="flex gap-1 items-center">
+                        {answer.condition && (
+                          <span title="Condition"><HelpCircle className="h-4 w-4 text-orange-400" /></span>
+                        )}
+                        {answer.endsCondition && (
+                          <span title="Ends Conversation"><svg className="h-4 w-4 text-red-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></span>
+                        )}
+                        {answer.action && (
+                          <span title="Action"><svg className="h-4 w-4 text-purple-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h8" /></svg></span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => {
-                      const updatedAnswers = (selectedNode.data.answers || []).filter(a => a.id !== answer.id)
-                      onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
-                    }}
-                    className="ml-2 h-8 w-8 border border-red-500 hover:bg-red-700 text-white"
-                    aria-label="Delete Answer"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="p-4 flex flex-col gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-400 block mb-1">Answer Text</label>
-                    <Textarea
-                      value={answer.text}
-                      rows={2}
-                      onChange={(e) => {
-                        const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                          a.id === answer.id ? { ...a, text: e.target.value } : a
-                        )
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={e => {
+                        e.stopPropagation();
+                        const updatedAnswers = (selectedNode.data.answers || []).filter(a => a.id !== answer.id)
                         onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                       }}
-                      className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 placeholder:text-gray-500 resize-none w-full"
-                      placeholder="Enter answer text..."
-                    />
+                      className="ml-2 h-8 w-8 border border-red-500 hover:bg-red-700 text-white"
+                      aria-label="Delete Answer"
+                      tabIndex={-1}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <div className="flex flex-row items-center gap-6 mt-1">
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        id={`endsCondition-${answer.id}`}
-                        checked={answer.endsCondition}
-                        onCheckedChange={(checked) => {
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-4 flex flex-col gap-4 bg-gray-800">
+                    <div>
+                      <label className="text-sm font-medium text-gray-400 block mb-1">Answer Text</label>
+                      <Textarea
+                        value={answer.text}
+                        rows={2}
+                        onChange={(e) => {
                           const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                            a.id === answer.id ? { ...a, endsCondition: checked === true } : a
+                            a.id === answer.id ? { ...a, text: e.target.value } : a
                           )
                           onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                         }}
-                        className="h-4 w-4 rounded border-gray-500 bg-gray-800 text-red-500 focus:ring-red-400 focus:ring-offset-0 hover:bg-red-500 transition-colors duration-200"
+                        className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 placeholder:text-gray-500 resize-none w-full"
+                        placeholder="Enter answer text..."
                       />
-                      <label
-                        htmlFor={`endsCondition-${answer.id}`}
-                        className="text-white text-sm cursor-pointer select-none flex items-center"
-                      >
-                        Ends Conversation
-                      </label>
+                    </div>
+                    <div className="flex flex-row items-center gap-6 mt-1">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={`endsCondition-${answer.id}`}
+                          checked={answer.endsCondition}
+                          onCheckedChange={(checked) => {
+                            const updatedAnswers = (selectedNode.data.answers || []).map(a =>
+                              a.id === answer.id ? { ...a, endsCondition: checked === true } : a
+                            )
+                            onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                          }}
+                          className="h-4 w-4 rounded border-gray-500 bg-gray-800 text-red-500 focus:ring-red-400 focus:ring-offset-0 hover:bg-red-500 transition-colors duration-200"
+                        />
+                        <label
+                          htmlFor={`endsCondition-${answer.id}`}
+                          className="text-white text-sm cursor-pointer select-none flex items-center"
+                        >
+                          Ends Conversation
+                        </label>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-400 block mb-1">Probability (%)</label>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={answer.probability}
+                          onChange={(e) => {
+                            const value = e.target.value === '' ? 0 : Number.parseInt(e.target.value);
+                            const probability = isNaN(value) ? 100 / (selectedNode.data.answers?.length || 1) : value;
+                            const updatedAnswers = (selectedNode.data.answers || []).map(a =>
+                              a.id === answer.id ? { ...a, probability } : a
+                            )
+                            onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                          }}
+                          className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 w-32"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 flex flex-col gap-6 border-t border-gray-700 bg-gray-800 rounded-b-lg">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2 group relative">
+                        <label className="text-xs font-medium text-gray-300">Condition (Optional)</label>
+                        <div className="relative flex items-center group">
+                          <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-300" />
+                          <div className="absolute bottom-full left-1/2 -translate-x-[40%] mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[19rem] p-2 z-10">
+                            Enter a <strong>public static</strong> C# method that returns a boolean and takes in <strong>0 parameters.</strong> This determines if this answer should be available to be chosen. Leave all fields empty to always show the answer. Fill in each part separately: Assembly, Namespace, Class, Method.
+                          </div>
+                        </div>
+                      </div>
+                      <Input
+                        type="text"
+                        placeholder="Assembly.Namespace.Class.Method"
+                        value={answer.condition || ""}
+                        onChange={e => {
+                          const updatedAnswers = (selectedNode.data.answers || []).map(a =>
+                            a.id === answer.id ? { ...a, condition: e.target.value } : a
+                          )
+                          onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                        }}
+                        className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 w-full"
+                      />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-400 block mb-1">Probability (%)</label>
+                      <div className="flex items-center gap-2 mb-2 group relative">
+                        <label className="text-xs font-medium text-gray-300">Action (Optional)</label>
+                        <div className="relative flex items-center group">
+                          <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-300" />
+                          <div className="absolute bottom-full left-1/2 -translate-x-[35%] mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[19rem] p-2 z-10">
+                            Enter a <strong>public static</strong> C# method that takes in <strong>0 parameters.</strong> This method will be called when this answer is chosen. Leave all fields empty to do nothing. Fill in each part separately: Assembly, Namespace, Class, Method.
+                          </div>
+                        </div>
+                      </div>
                       <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={answer.probability}
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? 0 : Number.parseInt(e.target.value);
-                          const probability = isNaN(value) ? 100 / (selectedNode.data.answers?.length || 1) : value;
+                        type="text"
+                        placeholder="Assembly.Namespace.Class.Method"
+                        value={answer.action || ""}
+                        onChange={e => {
                           const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                            a.id === answer.id ? { ...a, probability } : a
+                            a.id === answer.id ? { ...a, action: e.target.value } : a
                           )
                           onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
                         }}
-                        className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 w-32"
+                        className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 w-full"
                       />
                     </div>
                   </div>
-                </div>
-                <div className="p-4 flex flex-col gap-6 border-t border-gray-700 bg-gray-800 rounded-b-lg">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2 group relative">
-                      <label className="text-xs font-medium text-gray-300">Condition (Optional)</label>
-                      <div className="relative flex items-center group">
-                        <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-300" />
-                        <div className="absolute bottom-full left-1/2 -translate-x-[40%] mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[19rem] p-2 z-10">
-                          Enter a <strong>public static</strong> C# method that returns a boolean and takes in <strong>0 parameters.</strong> This determines if this answer should be available to be chosen. Leave all fields empty to always show the answer. Fill in each part separately: Assembly, Namespace, Class, Method.
-                        </div>
-                      </div>
+                  <label className="text-xs text-gray-300 pl-4 mb-2 font-medium">Consequences</label>
+                  <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 flex flex-col gap-4 w-11/12 mb-3 mx-auto">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm text-gray-300">Questions to Add</label>
+                      <MultiSelect
+                        options={nodes.filter(node => node.id !== selectedNode.id).map(node => ({ label: node.title, value: node.id }))}
+                        selected={(answer.consequences?.questionsToAdd || []).filter((id: string) => nodes.some(node => node.id === id))}
+                        onChange={(selected) => {
+                          const updatedAnswers = (selectedNode.data.answers || []).map(a =>
+                            a.id === answer.id ? {
+                              ...a,
+                              consequences: {
+                                ...a.consequences,
+                                answerNodeId: answer.id,
+                                questionsToAdd: selected.filter(id => nodes.some(node => node.id === id))
+                              }
+                            } : a
+                          )
+                          onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                        }}
+                      />
                     </div>
-                    <Input
-                      type="text"
-                      placeholder="Assembly.Namespace.Class.Method"
-                      value={answer.condition || ""}
-                      onChange={e => {
-                        const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                          a.id === answer.id ? { ...a, condition: e.target.value } : a
-                        )
-                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
-                      }}
-                      className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 w-full"
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-2 group relative">
-                      <label className="text-xs font-medium text-gray-300">Action (Optional)</label>
-                      <div className="relative flex items-center group">
-                        <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-300" />
-                        <div className="absolute bottom-full left-1/2 -translate-x-[35%] mb-2 hidden group-hover:block bg-gray-900 text-sm text-gray-200 rounded-lg shadow-lg w-[19rem] p-2 z-10">
-                          Enter a <strong>public static</strong> C# method that takes in <strong>0 parameters.</strong> This method will be called when this answer is chosen. Leave all fields empty to do nothing. Fill in each part separately: Assembly, Namespace, Class, Method.
-                        </div>
-                      </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm text-gray-300">Questions to Remove</label>
+                      <MultiSelect
+                        options={nodes.filter(node => node.id !== selectedNode.id).map(node => ({ label: node.title, value: node.id }))}
+                        selected={(answer.consequences?.questionsToRemove || []).filter((id: string) => nodes.some(node => node.id === id))}
+                        onChange={(selected) => {
+                          const updatedAnswers = (selectedNode.data.answers || []).map(a =>
+                            a.id === answer.id ? {
+                              ...a,
+                              consequences: {
+                                ...a.consequences,
+                                answerNodeId: answer.id,
+                                questionsToRemove: selected.filter(id => nodes.some(node => node.id === id))
+                              }
+                            } : a
+                          )
+                          onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                        }}
+                      />
                     </div>
-                    <Input
-                      type="text"
-                      placeholder="Assembly.Namespace.Class.Method"
-                      value={answer.action || ""}
-                      onChange={e => {
-                        const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                          a.id === answer.id ? { ...a, action: e.target.value } : a
-                        )
-                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
-                      }}
-                      className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 w-full"
-                    />
                   </div>
-                </div>
-                <label className="text-xs text-gray-300 pl-4 mb-2 font-medium">Consequences</label>
-                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 flex flex-col gap-4 w-11/12 mb-3 mx-auto">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm text-gray-300">Questions to Add</label>
-                    <MultiSelect
-                      options={nodes.filter(node => node.id !== selectedNode.id).map(node => ({ label: node.title, value: node.id }))}
-                      selected={(answer.consequences?.questionsToAdd || []).filter((id: string) => nodes.some(node => node.id === id))}
-                      onChange={(selected) => {
-                        const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                          a.id === answer.id ? { 
-                            ...a, 
-                            consequences: {
-                              ...a.consequences,
-                              answerNodeId: answer.id,
-                              questionsToAdd: selected.filter(id => nodes.some(node => node.id === id))
-                            }
-                          } : a
-                        )
-                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
-                      }}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm text-gray-300">Questions to Remove</label>
-                    <MultiSelect
-                      options={nodes.filter(node => node.id !== selectedNode.id).map(node => ({ label: node.title, value: node.id }))}
-                      selected={(answer.consequences?.questionsToRemove || []).filter((id: string) => nodes.some(node => node.id === id))}
-                      onChange={(selected) => {
-                        const updatedAnswers = (selectedNode.data.answers || []).map(a =>
-                          a.id === answer.id ? { 
-                            ...a, 
-                            consequences: {
-                              ...a.consequences,
-                              answerNodeId: answer.id,
-                              questionsToRemove: selected.filter(id => nodes.some(node => node.id === id))
-                            }
-                          } : a
-                        )
-                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
-                      }}
-                    />
-                  </div> 
-                </div>
-              </Card>
+                </CollapsibleContent>
+              </Collapsible>
             ))}
 
             <Button

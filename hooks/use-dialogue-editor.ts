@@ -95,7 +95,7 @@ export function useDialogueEditor() {
         y: mouseY - (mouseY - prev.y) * zoomRatio
       }))
     }
-    
+    setSelectedNode(null)
     setZoom(newZoom)
   }, [zoom])
 

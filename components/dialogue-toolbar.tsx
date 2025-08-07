@@ -239,6 +239,25 @@ export function DialogueToolbar({
               <HelpCircle className="h-5 w-5 mr-2 text-blue-400" />
               {helpPage === 0 ? 'Quick Guide' : 'Directions'}
             </h3>
+            {/* Navigation Buttons */}
+          <div className="flex justify-center gap-4">
+            <Button
+              size="sm"
+              variant={helpPage === 0 ? "default" : "secondary"}
+              className={`px-4 text-white ${helpPage === 0 ? "bg-gray-900" : "bg-gray-700 hover:bg-gray-600"}`}
+              onClick={() => setHelpPage(0)}
+            >
+              Controls
+            </Button>
+            <Button
+              size="sm"
+              variant={helpPage === 1 ? "default" : "secondary"}
+              className={`px-4 text-white ${helpPage === 1 ? "bg-gray-900" : "bg-gray-700 hover:bg-gray-600"}`}
+              onClick={() => setHelpPage(1)}
+            >
+              Directions
+            </Button>
+          </div>
             <Button
               size="sm"
               variant="ghost"
@@ -248,7 +267,6 @@ export function DialogueToolbar({
               <X className="h-3 w-3" />
             </Button>
           </div>
-
           {helpPage === 0 ? (
             <div className="space-y-4">
               {/* Connection Legend */}
@@ -373,25 +391,6 @@ export function DialogueToolbar({
               </div>
             </div>
           )}
-          {/* Navigation Buttons */}
-          <div className="flex justify-center gap-4 mt-6">
-            <Button
-              size="sm"
-              variant={helpPage === 0 ? "default" : "secondary"}
-              className={`px-4 text-white ${helpPage === 0 ? "bg-gray-900" : "bg-gray-700 hover:bg-gray-600"}`}
-              onClick={() => setHelpPage(0)}
-            >
-              Controls
-            </Button>
-            <Button
-              size="sm"
-              variant={helpPage === 1 ? "default" : "secondary"}
-              className={`px-4 text-white ${helpPage === 1 ? "bg-gray-900" : "bg-gray-700 hover:bg-gray-600"}`}
-              onClick={() => setHelpPage(1)}
-            >
-              Directions
-            </Button>
-          </div>
         </div>
       )}
     </>
