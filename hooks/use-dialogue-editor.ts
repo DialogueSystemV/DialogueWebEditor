@@ -118,6 +118,22 @@ export function useDialogueEditor() {
     }
   }, [handleWheel])
 
+  // Handle page exit warning
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Always show warning when user tries to leave
+      e.preventDefault()
+      toast.error('The editor WILL NOT save your changes. Please export before leaving.')
+      e.returnValue = '' // This triggers the browser's confirmation dialog
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [])
+
   const addNode = (type: NodeType) => {
     const newNode: NodeData = {
       id: Date.now().toString(),
