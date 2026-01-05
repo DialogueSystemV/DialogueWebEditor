@@ -113,9 +113,26 @@ export function DialogueProperties() {
         <div className="bg-gray-750 rounded-lg p-3 border border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <label className="text-sm font-medium text-gray-300">Answers</label>
-            <Badge variant="secondary" className="bg-blue-600 text-blue-100">
-              {(selectedNode.data.answers || []).length} answers
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  const answers = selectedNode.data.answers || []
+                  const count = answers.length
+                  if (count === 0) return
+                  const equalProbability = Math.round(100 / count)
+                  const updated = answers.map(a => ({ ...a, probability: equalProbability }))
+                  updateNodeAnswers(selectedNode.id, updated)
+                }}
+                className="bg-gray-700 hover:bg-gray-600 text-white"
+              >
+                Equalize
+              </Button>
+              <Badge variant="secondary" className="bg-blue-600 text-blue-100">
+                {(selectedNode.data.answers || []).length} answers
+              </Badge>
+            </div>
           </div>
 
           <div className="space-y-6">

@@ -47,7 +47,7 @@ export function useDialogueEditor() {
       }
       draggedNodeRef.current = nodeId
       // initialize ghost at current node position
-      setDragGhost({ nodeId, x: node.position.x, y: node.position.y })
+      // setDragGhost({ nodeId, x: node.position.x, y: node.position.y })
     },
     [nodes, zoom],
   )

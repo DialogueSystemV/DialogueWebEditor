@@ -41,10 +41,18 @@ export function DialogueToolbar({
     nodes.forEach(node => {
       if (node.data.answers) {
         node.data.answers.forEach(answer => {
-          if (answer.consequences) {
-            allConsequences.push({
-              consequences: answer.consequences
-            })
+          const c = answer.consequences
+          // Only include meaningful consequences and flatten structure
+          const hasMeaningfulData =
+            c &&
+            (
+              (typeof c.answerNodeId === "string" && c.answerNodeId.trim().length > 0) ||
+              (Array.isArray(c.questionsToAdd) && c.questionsToAdd.length > 0) ||
+              (Array.isArray(c.questionsToRemove) && c.questionsToRemove.length > 0)
+            )
+          
+          if (hasMeaningfulData) {
+            allConsequences.push(c)
           }
         })
       }
