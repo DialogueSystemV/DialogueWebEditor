@@ -1,16 +1,17 @@
 "use client"
 
 import React from "react"
-import { useDialogueEditor } from "@/hooks/use-dialogue-editor"
+import { DialogueProvider, useDialogueContext } from "@/contexts/dialogue-context"
 import { DialogueCanvas } from "./dialogue-canvas"
 import { DialogueToolbar } from "./dialogue-toolbar"
 import { DialogueProperties } from "./dialogue-properties"
 
-export function DialogueEditor() {
+function DialogueEditorContent() {
+  const { nodes, selectedNode } = useDialogueContext()
+  const selectedNodeData = selectedNode ? nodes.find((n) => n.id === selectedNode) : null
+  
+  // Get canvas/interaction handlers from context (but pass as props)
   const {
-    nodes,
-    connections,
-    selectedNode,
     connecting,
     removing,
     firstLinkClick,
@@ -18,68 +19,55 @@ export function DialogueEditor() {
     panOffset,
     zoom,
     canvasRef,
+    draggedNode,
     handleNodeMouseDown,
     handleCanvasMouseDown,
     handleNodeClick,
-    addNode,
-    deleteNode,
-    cloneNode,
-    deleteConnection,
-    updateNodeData,
-    updateNodeAnswers,
     startConnecting,
     cancelConnecting,
     cancelRemoving,
-    loadNodesAndConnections,
-  } = useDialogueEditor()
-
-  const selectedNodeData = selectedNode ? nodes.find((n) => n.id === selectedNode) : null
+    cloneNode,
+  } = useDialogueContext()
 
   return (
     <div className="h-full w-full bg-gray-900 flex">
       {/* Main Canvas */}
       <div className="flex-1 relative overflow-hidden">
         <DialogueCanvas
-          nodes={nodes}
-          connections={connections}
-          selectedNode={selectedNode}
           connecting={connecting}
           firstLinkClick={firstLinkClick}
           isPanning={isPanning}
           panOffset={panOffset}
           zoom={zoom}
           canvasRef={canvasRef}
-          onNodeMouseDown={handleNodeMouseDown}
-          onCanvasMouseDown={handleCanvasMouseDown}
-          onNodeClick={handleNodeClick}
-          onStartConnecting={startConnecting}
-          onCloneNode={cloneNode}
+          draggedNode={draggedNode}
+          handleNodeMouseDown={handleNodeMouseDown}
+          handleCanvasMouseDown={handleCanvasMouseDown}
+          handleNodeClick={handleNodeClick}
+          startConnecting={startConnecting}
+          cloneNode={cloneNode}
         />
-
         <DialogueToolbar
-          onAddNode={addNode}
-          nodes={nodes} 
-          connections={connections}
           connecting={connecting}
           removing={removing}
-          onCancelConnecting={cancelConnecting}
-          onCancelRemoving={cancelRemoving}
-          onLoadData={loadNodesAndConnections}
+          cancelConnecting={cancelConnecting}
+          cancelRemoving={cancelRemoving}
         />
       </div>
 
       {/* Properties Panel */}
-      {selectedNodeData && (
-        <DialogueProperties
-          selectedNode={selectedNodeData}
-          nodes={nodes}
-          connections={connections}
-          onUpdateNodeData={updateNodeData}
-          onUpdateNodeAnswers={updateNodeAnswers}
-          onDeleteNode={deleteNode}
-        />
+      {selectedNodeData && !draggedNode && (
+        <DialogueProperties />
       )}
     </div>
+  )
+}
+
+export function DialogueEditor() {
+  return (
+    <DialogueProvider>
+      <DialogueEditorContent />
+    </DialogueProvider>
   )
 }
 

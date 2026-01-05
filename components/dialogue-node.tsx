@@ -1,52 +1,59 @@
 "use client"
 
-import React from "react"
+import React, { memo } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Link, CopyPlus, MessageCircleQuestion } from "lucide-react"
-import type { NodeData, Answer } from "@/types/dialogue"
-import { nodeTypes } from "@/types/dialogue"
+import type { NodeData } from "@/types/dialogue"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
 
 interface DialogueNodeProps {
   node: NodeData
   isSelected: boolean
-  isConnecting: boolean
-  isFirstLinkClick: boolean
+  connecting: { nodeId: string } | null
+  firstLinkClick: string | null
   zoom: number
-  onMouseDown: (e: React.MouseEvent, nodeId: string) => void
-  onClick: (nodeId: string, isRightClick?: boolean) => void
-  onStartConnecting: (nodeId: string, answerId: string) => void
-  onCloneNode: (nodeId: string) => void
+  panOffset: { x: number; y: number }
+  handleNodeMouseDown: (e: React.MouseEvent, nodeId: string) => void
+  handleNodeClick: (nodeId: string, isRightClick?: boolean) => void
+  startConnecting: (nodeId: string) => void
+  cloneNode: (nodeId: string) => void
 }
 
-export function DialogueNode({
+export const DialogueNode = memo(function DialogueNode({
   node,
   isSelected,
-  isConnecting,
-  isFirstLinkClick,
+  connecting,
+  firstLinkClick,
   zoom,
-  onMouseDown,
-  onClick,
-  onStartConnecting,
-  onCloneNode,
+  panOffset,
+  handleNodeMouseDown,
+  handleNodeClick,
+  startConnecting,
+  cloneNode,
 }: DialogueNodeProps) {
+  const isConnecting = !!connecting
+  const isFirstLinkClick = firstLinkClick === node.id
+
+  const transformedPosition = {
+    x: node.position.x * zoom + panOffset.x,
+    y: node.position.y * zoom + panOffset.y,
+  }
   return (
     <Card
       className={`absolute w-72 bg-gray-700 border-gray-600 cursor-grab ${isSelected ? "ring-2 ring-blue-500" : ""} ${isFirstLinkClick ? "ring-2 ring-green-500" : ""}`}
       style={{
-        left: node.position.x,
-        top: node.position.y,
+        transform: `translate3d(${transformedPosition.x}px, ${transformedPosition.y}px, 0) scale(${zoom})`,
         userSelect: "none",
-        transform: `scale(${zoom})`,
         transformOrigin: "top left",
+        willChange: "transform",
       }}
-      onMouseDown={(e) => onMouseDown(e, node.id)}
-      onClick={() => onClick(node.id)}
+      onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
+      onClick={() => handleNodeClick(node.id)}
       onContextMenu={(e) => {
         e.preventDefault()
-        onClick(node.id, true)
+        handleNodeClick(node.id, true)
       }}
     >
       {/* Node Header */}
@@ -62,7 +69,7 @@ export function DialogueNode({
               className="h-6 w-6 text-white hover:bg-white/20"
               onClick={(e) => {
                 e.stopPropagation()
-                onCloneNode(node.id)
+                cloneNode(node.id)
               }}
               title="Clone node"
             >
@@ -74,7 +81,7 @@ export function DialogueNode({
               className="h-6 w-6 text-white hover:bg-white/20"
               onClick={(e) => {
                 e.stopPropagation()
-                onStartConnecting(node.id, "null")
+                startConnecting(node.id)
               }}
               title="Connect node"
             >
@@ -186,4 +193,26 @@ export function DialogueNode({
       </div>
     </Card>
   )
-} 
+}, (prevProps, nextProps) => {
+  // Return true if props are equal (skip re-render), false if different (re-render)
+  // Only check answers length, not full content (expensive)
+  const prevAnswersLength = prevProps.node.data.answers?.length ?? 0
+  const nextAnswersLength = nextProps.node.data.answers?.length ?? 0
+  
+  return (
+    prevProps.node.id === nextProps.node.id &&
+    prevProps.node.position.x === nextProps.node.position.x &&
+    prevProps.node.position.y === nextProps.node.position.y &&
+    prevProps.node.title === nextProps.node.title &&
+    prevProps.node.startsConversation === nextProps.node.startsConversation &&
+    prevProps.node.removeQuestionAfterAsked === nextProps.node.removeQuestionAfterAsked &&
+    prevProps.node.data.questionText === nextProps.node.data.questionText &&
+    prevAnswersLength === nextAnswersLength &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.connecting?.nodeId === nextProps.connecting?.nodeId &&
+    prevProps.firstLinkClick === nextProps.firstLinkClick &&
+    prevProps.zoom === nextProps.zoom &&
+    prevProps.panOffset.x === nextProps.panOffset.x &&
+    prevProps.panOffset.y === nextProps.panOffset.y
+  )
+}) 

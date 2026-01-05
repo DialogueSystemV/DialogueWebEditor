@@ -2,32 +2,34 @@
 
 import React, { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Plus, X, HelpCircle, MousePointer, MousePointer2, ZoomIn, Link, Unlink, Move, CopyPlus } from "lucide-react"
-import { Connection, NodeData, nodeTypes, type NodeType } from "@/types/dialogue"
+import { Plus, X, HelpCircle, MousePointer, MousePointer2, ZoomIn, ZoomOut, Link, Unlink, Move, CopyPlus } from "lucide-react"
+import { nodeTypes, type NodeType } from "@/types/dialogue"
 import { toast, Toaster } from "sonner"
 import { Input } from "./ui/input"
+import { useDialogueContext } from "@/contexts/dialogue-context"
 
 interface DialogueToolbarProps {
-  onAddNode: (type: NodeType) => void
-  nodes: NodeData[]
-  connections: Connection[]
   connecting: { nodeId: string } | null
   removing: { nodeId: string } | null
-  onCancelConnecting: () => void
-  onCancelRemoving: () => void
-  onLoadData: (nodes: NodeData[], connections: Connection[]) => void
+  cancelConnecting: () => void
+  cancelRemoving: () => void
 }
 
 export function DialogueToolbar({
-  onAddNode,
-  nodes,
-  connections,
   connecting,
   removing,
-  onCancelConnecting,
-  onCancelRemoving,
-  onLoadData
+  cancelConnecting,
+  cancelRemoving,
 }: DialogueToolbarProps) {
+  const {
+    nodes,
+    connections,
+    addNode,
+    loadNodesAndConnections,
+    zoomIn,
+    zoomOut,
+    resetZoom,
+  } = useDialogueContext()
   const [showHelp, setShowHelp] = useState(false)
   const [helpPage, setHelpPage] = useState(0); // 0: controls, 1: directions
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -101,13 +103,43 @@ export function DialogueToolbar({
             key={type}
             variant="secondary"
             size="sm"
-            onClick={() => onAddNode(type as NodeType)}
+            onClick={() => addNode(type as NodeType)}
             className="bg-gray-700 hover:bg-gray-600 text-white"
           >
             <Plus className="h-4 w-4 mr-1" />
             {config.title}
           </Button>
         ))}
+
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={zoomOut}
+            className="bg-gray-700 hover:bg-gray-600 text-white"
+            title="Zoom Out"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={zoomIn}
+            className="bg-gray-700 hover:bg-gray-600 text-white"
+            title="Zoom In"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={resetZoom}
+            className="bg-gray-700 hover:bg-gray-600 text-white"
+            title="Reset Zoom"
+          >
+            Reset
+          </Button>
+        </div>
 
         <Button onClick={() => {
           if (!nodes.some(node => node.startsConversation)) {
@@ -175,7 +207,7 @@ export function DialogueToolbar({
                     reader.onload = (e) => {
                       try {
                         const json = JSON.parse(e.target?.result as string);
-                        onLoadData(json.nodes, json.connections);
+                        loadNodesAndConnections(json.nodes, json.connections);
                         toast.success('File loaded successfully');
                         fileInputRef.current!.value = "";
                       } catch (err) {
@@ -208,7 +240,7 @@ export function DialogueToolbar({
             <Button
               size="sm"
               variant="ghost"
-              onClick={onCancelConnecting}
+              onClick={cancelConnecting}
               className="h-6 w-6 px-5 text-green-300 hover:bg-green-900/50"
             >
               <X className="h-3 w-3" />
@@ -222,7 +254,7 @@ export function DialogueToolbar({
             <Button
               size="sm"
               variant="ghost"
-              onClick={onCancelRemoving}
+              onClick={cancelRemoving}
               className="h-6 w-6 px-5 text-red-300 hover:bg-red-900/50"
             >
               <X className="h-3 w-3" />

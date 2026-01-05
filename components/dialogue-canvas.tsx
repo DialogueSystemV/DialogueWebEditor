@@ -1,54 +1,107 @@
 "use client"
 
-import React from "react"
+import React, { useMemo, memo } from "react"
+import { useDialogueContext } from "@/contexts/dialogue-context"
 import type { NodeData, Connection } from "@/types/dialogue"
 import { DialogueNode } from "./dialogue-node"
+
 interface DialogueCanvasProps {
-  nodes: NodeData[]
-  connections: Connection[]
-  selectedNode: string | null
   connecting: { nodeId: string } | null
   firstLinkClick: string | null
   isPanning: boolean
   panOffset: { x: number; y: number }
   zoom: number
   canvasRef: React.RefObject<HTMLDivElement | null>
-  onNodeMouseDown: (e: React.MouseEvent, nodeId: string) => void
-  onCanvasMouseDown: (e: React.MouseEvent) => void
-  onNodeClick: (nodeId: string, isRightClick?: boolean) => void
-  onStartConnecting: (nodeId: string, answerId: string) => void
-  onCloneNode: (nodeId: string) => void
+  draggedNode: string | null
+  handleNodeMouseDown: (e: React.MouseEvent, nodeId: string) => void
+  handleCanvasMouseDown: (e: React.MouseEvent) => void
+  handleNodeClick: (nodeId: string, isRightClick?: boolean) => void
+  startConnecting: (nodeId: string) => void
+  cloneNode: (nodeId: string) => void
 }
 
 export function DialogueCanvas({
-  nodes,
-  connections,
-  selectedNode,
   connecting,
   firstLinkClick,
   isPanning,
   panOffset,
   zoom,
   canvasRef,
-  onNodeMouseDown,
-  onCanvasMouseDown,
-  onNodeClick,
-  onStartConnecting,
-  onCloneNode,
+  draggedNode,
+  handleNodeMouseDown,
+  handleCanvasMouseDown,
+  handleNodeClick,
+  startConnecting,
+  cloneNode,
 }: DialogueCanvasProps) {
-  const getConnectionPath = (from: { x: number; y: number }, to: { x: number; y: number }) => {
-    const dx = to.x - from.x
-    const dy = to.y - from.y
-    const controlPoint1X = from.x + dx * 0.5
-    const controlPoint2X = to.x - dx * 0.5
+  const { nodes, connections, selectedNode, dragGhost } = useDialogueContext()
+  
+  // Cache per-node transformed positions for this frame
+  const nodePositionCache = useMemo(() => {
+    const cache = new Map<string, { fromX: number; toX: number; y: number }>()
+    for (const node of nodes) {
+      const y = (node.position.y + 40) * zoom + panOffset.y
+      const toX = node.position.x * zoom + panOffset.x
+      const fromX = (node.position.x + 288) * zoom + panOffset.x
+      cache.set(node.id, { fromX, toX, y })
+    }
+    return cache
+  }, [nodes, zoom, panOffset])
 
-    return `M ${from.x} ${from.y} C ${controlPoint1X} ${from.y} ${controlPoint2X} ${to.y} ${to.x} ${to.y}`
-  }
+  // Memoized connection component (re-renders only when endpoints/connecting change)
+  const ConnectionPath = memo(function ConnectionPath({
+    id,
+    fromX,
+    fromY,
+    toX,
+    toY,
+    dimmed,
+  }: {
+    id: string
+    fromX: number
+    fromY: number
+    toX: number
+    toY: number
+    dimmed: boolean
+  }) {
+    const paths = useMemo(() => {
+      const dx = toX - fromX
+      const controlPoint1X = fromX + dx * 0.5
+      const controlPoint2X = toX - dx * 0.5
+      const connectionPath = `M ${fromX} ${fromY} C ${controlPoint1X} ${fromY} ${controlPoint2X} ${toY} ${toX} ${toY}`
+      const radius = 4
+      const fromDot = `M ${fromX - radius} ${fromY} a ${radius} ${radius} 0 1 0 ${radius * 2} 0 a ${radius} ${radius} 0 1 0 -${radius * 2} 0`
+      const toDot = `M ${toX - radius} ${toY} a ${radius} ${radius} 0 1 0 ${radius * 2} 0 a ${radius} ${radius} 0 1 0 -${radius * 2} 0`
+      return { connectionPath, fromDot, toDot }
+    }, [fromX, fromY, toX, toY])
 
-  const getDotPath = (to: { x: number; y: number }) => {
-    const radius = 4
-    return `M ${to.x - radius} ${to.y} a ${radius} ${radius} 0 1 0 ${radius * 2} 0 a ${radius} ${radius} 0 1 0 -${radius * 2} 0`
-  }
+    const opacityClass = dimmed ? "opacity-50" : ""
+    return (
+      <g key={id}>
+        <path
+          d={paths.fromDot}
+          stroke="#10b981"
+          strokeWidth="2"
+          fill="#10b981"
+          className={opacityClass}
+        />
+        <path
+          d={paths.connectionPath}
+          stroke="#3b82f6"
+          strokeWidth="2"
+          fill="none"
+          className={opacityClass}
+        />
+        <path
+          d={paths.toDot}
+          stroke="#ef4444"
+          strokeWidth="2"
+          fill="#ef4444"
+          className={opacityClass}
+        />
+      </g>
+    )
+  })
 
   return (
     <div
@@ -59,93 +112,86 @@ export function DialogueCanvas({
         backgroundSize: `${20 * zoom}px ${20 * zoom}px`,
         backgroundPosition: `${panOffset.x}px ${panOffset.y}px`,
       }}
-      onMouseDown={onCanvasMouseDown}
+      onMouseDown={handleCanvasMouseDown}
     >
       {/* Nodes - rendered first so connections appear on top */}
       {nodes.map((node) => (
         <DialogueNode
           key={node.id}
-          node={{
-            ...node,
-            position: {
-              x: node.position.x * zoom + panOffset.x,
-              y: node.position.y * zoom + panOffset.y,
-            }
-          }}
+          node={node}
           isSelected={selectedNode === node.id}
-          isConnecting={!!connecting}
-          isFirstLinkClick={firstLinkClick === node.id}
+          connecting={connecting}
+          firstLinkClick={firstLinkClick}
           zoom={zoom}
-          onMouseDown={onNodeMouseDown}
-          onClick={onNodeClick}
-          onStartConnecting={onStartConnecting}
-          onCloneNode={onCloneNode}
+          panOffset={panOffset}
+          handleNodeMouseDown={handleNodeMouseDown}
+          handleNodeClick={handleNodeClick}
+          startConnecting={startConnecting}
+          cloneNode={cloneNode}
         />
       ))}
 
+      {/* Drag ghost overlay */}
+      {dragGhost.nodeId && (() => {
+        const ghostNode = nodes.find(n => n.id === dragGhost.nodeId)
+        if (!ghostNode) return null
+        const tx = dragGhost.x * zoom + panOffset.x
+        const ty = dragGhost.y * zoom + panOffset.y
+        return (
+          <div
+            key={`ghost-${dragGhost.nodeId}`}
+            className="absolute pointer-events-none"
+            style={{
+              transform: `translate3d(${tx}px, ${ty}px, 0) scale(${zoom})`,
+              transformOrigin: "top left",
+              zIndex: 20,
+              width: 288,
+            }}
+          >
+            <div className="w-72 opacity-60">
+              <div className={`${ghostNode.startsConversation ? "bg-green-600" : "bg-blue-600"} ${ghostNode.removeQuestionAfterAsked && !ghostNode.startsConversation ? "bg-yellow-600" : ""} px-3 py-2 rounded-t-lg border-2 border-dashed border-white/60`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-medium text-sm">{ghostNode.title}</span>
+                </div>
+              </div>
+              <div className="p-3 bg-gray-800 border-2 border-dashed border-white/40 rounded-b-lg">
+                {ghostNode.data.questionText && (
+                  <div className="flex items-center bg-blue-900/80 border-l-4 border-blue-400 px-3 py-2 rounded text-xs text-white font-semibold mb-1">
+                    <span className="truncate">{ghostNode.data.questionText}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Connections - rendered after nodes so they appear on top */}
-      <svg 
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{
-          zIndex: 10,
-        }}
-      >
-        {connections.map((connection) => {
-          const fromNode = nodes.find((n) => n.id === connection.from.nodeId)
-          const toNode = nodes.find((n) => n.id === connection.to.nodeId)
-          
-          if (!fromNode || !toNode) return null
-
-          const fromPos = {
-            x: (fromNode.position.x + (288)) * zoom + panOffset.x,
-            y: (fromNode.position.y + 40) * zoom + panOffset.y,
-          }
-          const toPos = {
-            x: toNode.position.x * zoom + panOffset.x,
-            y: (toNode.position.y + 40) * zoom + panOffset.y,
-          }
-
-        //   const getHorizontalDirection = (from: { x: number; y: number }, to: { x: number; y: number }) => {
-        //     if (to.x > from.x) {
-        //       return;
-        //     } else if (to.x < from.x) {
-        //       fromPos.x = (fromNode.position.x + (1 / zoom)) * zoom + panOffset.x
-        //       fromPos.y = (fromNode.position.y + 40) * zoom + panOffset.y
-        //       toPos.x = (toNode.position.x + (288 / zoom)) * zoom + panOffset.x
-        //       toPos.y = (toNode.position.y + 40) * zoom + panOffset.y
-        //     }
-        //   };
-        //   // Calculate positions after zoom and pan transformations
-        //  getHorizontalDirection(fromPos, toPos)
-
-          return (
-            <g key={connection.id}>
-              <path
-                d={getDotPath(fromPos)}
-                stroke="#10b981"
-                strokeWidth="2"
-                fill="#10b981"
-                className={!!connecting ? "opacity-50" : ""}
+      {!draggedNode && (
+        <svg 
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          style={{
+            zIndex: 10,
+          }}
+        >
+          {connections.map((connection) => {
+            const from = nodePositionCache.get(connection.from.nodeId)
+            const to = nodePositionCache.get(connection.to.nodeId)
+            if (!from || !to) return null
+            return (
+              <ConnectionPath
+                key={connection.id}
+                id={connection.id}
+                fromX={from.fromX}
+                fromY={from.y}
+                toX={to.toX}
+                toY={to.y}
+                dimmed={!!connecting}
               />
-              <path
-                d={getConnectionPath(fromPos, toPos)}
-                stroke="#3b82f6"
-                strokeWidth="2"
-                fill="none"
-                className={!!connecting ? "opacity-50" : ""}
-              />
-              
-              <path
-                d={getDotPath(toPos)}
-                stroke="#ef4444"
-                strokeWidth="2"
-                fill="#ef4444"
-                className={!!connecting ? "opacity-50" : ""}
-              />
-            </g>
-          )
-        })}
-      </svg>
+            )
+          })}
+        </svg>
+      )}
     </div>
   )
 } 

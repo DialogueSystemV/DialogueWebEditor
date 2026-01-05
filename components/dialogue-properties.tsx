@@ -7,28 +7,25 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Plus, Trash2, MessageSquare, HelpCircle, ChevronsUpDown } from "lucide-react"
-import type { NodeData, Answer, Connection } from "@/types/dialogue"
+import type { Answer } from "@/types/dialogue"
 import { MultiSelect } from "./ui/multi-select"
-import { ConditionInputModal } from "./condition-input-modal"
 import { Card } from "./ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
-interface DialoguePropertiesProps {
-  selectedNode: NodeData
-  nodes: NodeData[]
-  connections: Connection[]
-  onUpdateNodeData: (nodeId: string, field: string, value: any) => void
-  onUpdateNodeAnswers: (nodeId: string, answers: Answer[]) => void
-  onDeleteNode?: (nodeId: string) => void
-}
+import { useDialogueContext } from "@/contexts/dialogue-context"
 
-export function DialogueProperties({
-  selectedNode,
-  nodes,
-  connections,
-  onUpdateNodeData,
-  onUpdateNodeAnswers,
-  onDeleteNode,
-}: DialoguePropertiesProps) {
+export function DialogueProperties() {
+  const {
+    nodes,
+    connections,
+    selectedNode: selectedNodeId,
+    updateNodeData,
+    updateNodeAnswers,
+    deleteNode,
+  } = useDialogueContext()
+
+  const selectedNode = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : null
+
+  if (!selectedNode) return null
   return (
     <div className="w-[30rem] bg-gray-800 border-l border-gray-700 p-6 overflow-y-auto">
       <div className="flex items-center mb-6">
@@ -69,7 +66,7 @@ export function DialogueProperties({
           </div>
           <Input
             value={selectedNode.title}
-            onChange={(e) => onUpdateNodeData(selectedNode.id, "title", e.target.value)}
+            onChange={(e) => updateNodeData(selectedNode.id, "title", e.target.value)}
             className="bg-gray-900 border-2 border-blue-700 text-white text-lg font-semibold px-4 py-3 rounded-lg focus:border-blue-400 focus:ring-blue-400 placeholder:text-gray-500 shadow-sm"
             placeholder="Enter node title..."
           />
@@ -78,7 +75,7 @@ export function DialogueProperties({
           <label className="text-sm font-bold text-white block mb-3">Question Text</label>
           <Textarea
             value={selectedNode.data.questionText || ""}
-            onChange={(e) => onUpdateNodeData(selectedNode.id, "questionText", e.target.value)}
+            onChange={(e) => updateNodeData(selectedNode.id, "questionText", e.target.value)}
             className="bg-gray-900 border-2 border-blue-700 text-white text-base px-4 py-3 rounded-lg focus:border-blue-400 focus:ring-blue-400 resize-none placeholder:text-gray-500 shadow-sm min-h-[90px]"
             rows={4}
             placeholder="Enter the question for this node..."
@@ -93,7 +90,7 @@ export function DialogueProperties({
             <Checkbox
               checked={selectedNode.removeQuestionAfterAsked}
               onCheckedChange={(checked) => {
-                onUpdateNodeData(selectedNode.id, "removeQuestionAfterAsked", checked === true)
+                updateNodeData(selectedNode.id, "removeQuestionAfterAsked", checked === true)
               }}
               className="h-5 w-5 rounded border-gray-500 bg-gray-900 text-gray-400 focus:ring-blue-400 focus:ring-offset-0 hover:bg-gray-500 transition-colors duration-200"
             />
@@ -105,7 +102,7 @@ export function DialogueProperties({
               checked={selectedNode.startsConversation}
               disabled={connections.some(connection => connection.to.nodeId === selectedNode.id)}
               onCheckedChange={(checked) => {
-                onUpdateNodeData(selectedNode.id, "startsConversation", checked === true)
+                updateNodeData(selectedNode.id, "startsConversation", checked === true)
               }}
               className="h-5 w-5 rounded border-gray-500 bg-gray-900 text-gray-400 focus:ring-blue-400 focus:ring-offset-0 hover:bg-gray-500 transition-colors duration-200"
             />
@@ -139,7 +136,7 @@ export function DialogueProperties({
                       <Input
                         value={answer.title}
                         onChange={e =>
-                          onUpdateNodeAnswers(
+                          updateNodeAnswers(
                             selectedNode.id,
                             (selectedNode.data.answers || []).map(a =>
                               a.id === answer.id ? { ...a, title: e.target.value } : a
@@ -168,7 +165,7 @@ export function DialogueProperties({
                       onClick={e => {
                         e.stopPropagation();
                         const updatedAnswers = (selectedNode.data.answers || []).filter(a => a.id !== answer.id)
-                        onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                        updateNodeAnswers(selectedNode.id, updatedAnswers)
                       }}
                       className="ml-2 h-8 w-8 border border-red-500 hover:bg-red-700 text-white"
                       aria-label="Delete Answer"
@@ -189,7 +186,7 @@ export function DialogueProperties({
                           const updatedAnswers = (selectedNode.data.answers || []).map(a =>
                             a.id === answer.id ? { ...a, text: e.target.value } : a
                           )
-                          onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                          updateNodeAnswers(selectedNode.id, updatedAnswers)
                         }}
                         className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 placeholder:text-gray-500 resize-none w-full"
                         placeholder="Enter answer text..."
@@ -204,7 +201,7 @@ export function DialogueProperties({
                             const updatedAnswers = (selectedNode.data.answers || []).map(a =>
                               a.id === answer.id ? { ...a, endsCondition: checked === true } : a
                             )
-                            onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                            updateNodeAnswers(selectedNode.id, updatedAnswers)
                           }}
                           className="h-4 w-4 rounded border-gray-500 bg-gray-800 text-red-500 focus:ring-red-400 focus:ring-offset-0 hover:bg-red-500 transition-colors duration-200"
                         />
@@ -228,7 +225,7 @@ export function DialogueProperties({
                             const updatedAnswers = (selectedNode.data.answers || []).map(a =>
                               a.id === answer.id ? { ...a, probability } : a
                             )
-                            onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                            updateNodeAnswers(selectedNode.id, updatedAnswers)
                           }}
                           className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 w-32"
                         />
@@ -254,7 +251,7 @@ export function DialogueProperties({
                           const updatedAnswers = (selectedNode.data.answers || []).map(a =>
                             a.id === answer.id ? { ...a, condition: e.target.value } : a
                           )
-                          onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                          updateNodeAnswers(selectedNode.id, updatedAnswers)
                         }}
                         className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 w-full"
                       />
@@ -277,7 +274,7 @@ export function DialogueProperties({
                           const updatedAnswers = (selectedNode.data.answers || []).map(a =>
                             a.id === answer.id ? { ...a, action: e.target.value } : a
                           )
-                          onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                          updateNodeAnswers(selectedNode.id, updatedAnswers)
                         }}
                         className="bg-gray-900 border-gray-700 text-white focus:border-blue-400 focus:ring-blue-400 w-full"
                       />
@@ -301,7 +298,7 @@ export function DialogueProperties({
                               }
                             } : a
                           )
-                          onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                          updateNodeAnswers(selectedNode.id, updatedAnswers)
                         }}
                       />
                     </div>
@@ -321,7 +318,7 @@ export function DialogueProperties({
                               }
                             } : a
                           )
-                          onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                          updateNodeAnswers(selectedNode.id, updatedAnswers)
                         }}
                       />
                     </div>
@@ -349,7 +346,7 @@ export function DialogueProperties({
                   }
                 }
                 const updatedAnswers = [...(selectedNode.data.answers || []), newAnswer]
-                onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+                updateNodeAnswers(selectedNode.id, updatedAnswers)
               }}
               className="text-white hover:text-white bg-gray-700 hover:bg-gray-600 border-gray-500 w-full h-12"
             >
@@ -429,7 +426,7 @@ export function DialogueProperties({
         {/* Delete Node Button */}
         <Button
           variant="destructive"
-          onClick={() => onDeleteNode?.(selectedNode.id)}
+          onClick={() => deleteNode(selectedNode.id)}
           className="w-full border bg-gray-700 border-red-500 hover:bg-red-700 text-white h-15 flex items-center justify-center flex-col"
         >
           <div className="flex flex-col gap-1">

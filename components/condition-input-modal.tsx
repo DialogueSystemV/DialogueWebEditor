@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
+import { useDialogueContext } from "@/contexts/dialogue-context"
 
 // Helper to split condition/action string into parts
 function parseFieldValue(value: string | undefined) {
@@ -14,12 +15,25 @@ function parseFieldValue(value: string | undefined) {
   }
 }
 
-export function ConditionInputModal({ answer, selectedNode, onUpdateNodeAnswers, fieldType }: any) {
+interface ConditionInputModalProps {
+  answer: any
+  fieldType: 'condition' | 'action'
+}
+
+export function ConditionInputModal({ answer, fieldType }: ConditionInputModalProps) {
+  const { nodes, selectedNode: selectedNodeId, updateNodeAnswers } = useDialogueContext()
+  
+  const selectedNode = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : null
   const [fields, setFields] = useState(() => parseFieldValue(answer[fieldType]))
 
   useEffect(() => {
     setFields(parseFieldValue(answer[fieldType]))
   }, [answer[fieldType]])
+
+  if (!selectedNode) return null
+
+  // TypeScript guard: selectedNode is guaranteed to be non-null after the check above
+  const node = selectedNode
 
   function handleChange(field: string, value: string) {
     const newFields = { ...fields, [field]: value }
@@ -28,18 +42,18 @@ export function ConditionInputModal({ answer, selectedNode, onUpdateNodeAnswers,
     const fieldValue = [newFields.assembly, newFields.namespace, newFields.className, newFields.method]
       .filter((v, i, arr) => v || arr.slice(i+1).some(Boolean)) // keep empty if followed by non-empty
       .join('.')
-    const updatedAnswers = (selectedNode.data.answers || []).map((a: any) =>
+    const updatedAnswers = (node.data.answers || []).map((a: any) =>
       a.id === answer.id ? { ...a, [fieldType]: fieldValue || undefined } : a
     )
-    onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+    updateNodeAnswers(node.id, updatedAnswers)
   }
 
   function handleClear() {
     setFields({ assembly: '', namespace: '', className: '', method: '' })
-    const updatedAnswers = (selectedNode.data.answers || []).map((a: any) =>
+    const updatedAnswers = (node.data.answers || []).map((a: any) =>
       a.id === answer.id ? { ...a, [fieldType]: undefined } : a
     )
-    onUpdateNodeAnswers(selectedNode.id, updatedAnswers)
+    updateNodeAnswers(node.id, updatedAnswers)
   }
 
   return (

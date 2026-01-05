@@ -7,6 +7,7 @@ export function useDialogueEditor() {
   const [connections, setConnections] = useState<Connection[]>([])
   const [selectedNode, setSelectedNode] = useState<string | null>(null)
   const [draggedNode, setDraggedNode] = useState<string | null>(null)
+  const [dragGhost, setDragGhost] = useState<{ nodeId: string | null; x: number; y: number }>({ nodeId: null, x: 0, y: 0 })
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [connecting, setConnecting] = useState<{ nodeId: string } | null>(null)
   const [removing, setRemoving] = useState<{ nodeId: string } | null>(null)
@@ -16,6 +17,16 @@ export function useDialogueEditor() {
   const [lastPanPosition, setLastPanPosition] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const canvasRef = useRef<HTMLDivElement>(null)
+  const rafIdRef = useRef<number | null>(null)
+  const lastUpdateTimeRef = useRef<number>(0)
+  // Refs to avoid stale closures and to enable rAF-coalesced updates
+  const draggedNodeRef = useRef<string | null>(null)
+  const dragOffsetRef = useRef({ x: 0, y: 0 })
+  const isPanningRef = useRef(false)
+  const panOffsetRef = useRef({ x: 0, y: 0 })
+  const lastPanPositionRef = useRef({ x: 0, y: 0 })
+  const zoomRef = useRef(1)
+  const pendingMouseRef = useRef<{ x: number; y: number } | null>(null)
 
   const handleNodeMouseDown = useCallback(
     (e: React.MouseEvent, nodeId: string) => {
@@ -29,9 +40,16 @@ export function useDialogueEditor() {
         y: (e.clientY - rect.top) / zoom,
       })
       setDraggedNode(nodeId)
-      setSelectedNode(nodeId)
+      // sync refs
+      dragOffsetRef.current = {
+        x: (e.clientX - rect.left) / zoom,
+        y: (e.clientY - rect.top) / zoom,
+      }
+      draggedNodeRef.current = nodeId
+      // initialize ghost at current node position
+      setDragGhost({ nodeId, x: node.position.x, y: node.position.y })
     },
-    [nodes],
+    [nodes, zoom],
   )
 
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent) => {
@@ -41,38 +59,65 @@ export function useDialogueEditor() {
       setIsPanning(true)
       setSelectedNode(null)
       setLastPanPosition({ x: e.clientX, y: e.clientY })
+      // sync refs
+      isPanningRef.current = true
+      lastPanPositionRef.current = { x: e.clientX, y: e.clientY }
     }
   }, [])
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (isPanning) {
-        const deltaX = e.clientX - lastPanPosition.x
-        const deltaY = e.clientY - lastPanPosition.y
-        
-        setPanOffset(prev => ({
-          x: prev.x + deltaX,
-          y: prev.y + deltaY
-        }))
-        setLastPanPosition({ x: e.clientX, y: e.clientY })
-      } else if (draggedNode && canvasRef.current) {
-        const canvasRect = canvasRef.current.getBoundingClientRect()
-        // Account for pan offset and zoom in the calculation
-        // Since nodes are now scaled, we need to account for the scale in drag calculations
-        const newX = (e.clientX - canvasRect.left - dragOffset.x * zoom - panOffset.x) / zoom
-        const newY = (e.clientY - canvasRect.top - dragOffset.y * zoom - panOffset.y) / zoom
+  // rAF-coalesced move processing
+  const processMove = useCallback(() => {
+    rafIdRef.current = null
+    const coords = pendingMouseRef.current
+    if (!coords) return
 
-        setNodes((prev) =>
-          prev.map((node) => (node.id === draggedNode ? { ...node, position: { x: newX, y: newY } } : node)),
-        )
-      }
-    },
-    [isPanning, lastPanPosition, draggedNode, dragOffset, panOffset, zoom],
-  )
+    if (isPanningRef.current) {
+      const deltaX = coords.x - lastPanPositionRef.current.x
+      const deltaY = coords.y - lastPanPositionRef.current.y
+      setPanOffset(prev => {
+        const next = { x: prev.x + deltaX, y: prev.y + deltaY }
+        panOffsetRef.current = next
+        return next
+      })
+      const nextLast = { x: coords.x, y: coords.y }
+      setLastPanPosition(nextLast)
+      lastPanPositionRef.current = nextLast
+    } else if (draggedNodeRef.current && canvasRef.current) {
+      // Update lightweight ghost only (no node state updates)
+      const canvasRect = canvasRef.current.getBoundingClientRect()
+      const newX = (coords.x - canvasRect.left - dragOffsetRef.current.x * zoomRef.current - panOffsetRef.current.x) / zoomRef.current
+      const newY = (coords.y - canvasRect.top - dragOffsetRef.current.y * zoomRef.current - panOffsetRef.current.y) / zoomRef.current
+      setDragGhost({ nodeId: draggedNodeRef.current, x: newX, y: newY })
+    }
+  }, [])
 
-  const handleMouseUp = useCallback(() => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    pendingMouseRef.current = { x: e.clientX, y: e.clientY }
+    if (rafIdRef.current == null) {
+      rafIdRef.current = requestAnimationFrame(processMove)
+    }
+  }, [processMove])
+
+  const handleMouseUp = useCallback((e: MouseEvent) => {
+    // Commit final node position on mouseup (if dragging)
+    if (draggedNodeRef.current && canvasRef.current) {
+      const canvasRect = canvasRef.current.getBoundingClientRect()
+      const clientX = e.clientX
+      const clientY = e.clientY
+      const finalX = (clientX - canvasRect.left - dragOffsetRef.current.x * zoomRef.current - panOffsetRef.current.x) / zoomRef.current
+      const finalY = (clientY - canvasRect.top - dragOffsetRef.current.y * zoomRef.current - panOffsetRef.current.y) / zoomRef.current
+      const targetId = draggedNodeRef.current
+      setNodes((prev) =>
+        prev.map((node) => (node.id === targetId ? { ...node, position: { x: finalX, y: finalY } } : node)),
+      )
+    }
     setDraggedNode(null)
     setIsPanning(false)
+    // sync refs
+    draggedNodeRef.current = null
+    isPanningRef.current = false
+    // clear ghost
+    setDragGhost({ nodeId: null, x: 0, y: 0 })
   }, [])
 
   const handleWheel = useCallback((e: WheelEvent) => {
@@ -97,7 +142,46 @@ export function useDialogueEditor() {
     }
     setSelectedNode(null)
     setZoom(newZoom)
+    // sync refs
+    zoomRef.current = newZoom
   }, [zoom])
+
+  // Toolbar zoom controls (zoom around canvas center)
+  const zoomBy = useCallback((delta: number) => {
+    const currentZoom = zoomRef.current
+    const newZoom = Math.max(0.1, Math.min(3, currentZoom + delta))
+    const rect = canvasRef.current?.getBoundingClientRect()
+    if (rect) {
+      const cx = rect.width / 2
+      const cy = rect.height / 2
+      const zoomRatio = newZoom / currentZoom
+      setPanOffset(prev => ({
+        x: cx - (cx - prev.x) * zoomRatio,
+        y: cy - (cy - prev.y) * zoomRatio
+      }))
+    }
+    setZoom(newZoom)
+    zoomRef.current = newZoom
+  }, [])
+
+  const zoomIn = useCallback(() => zoomBy(0.1), [zoomBy])
+  const zoomOut = useCallback(() => zoomBy(-0.1), [zoomBy])
+  const resetZoom = useCallback(() => {
+    const currentZoom = zoomRef.current
+    const newZoom = 1
+    const rect = canvasRef.current?.getBoundingClientRect()
+    if (rect) {
+      const cx = rect.width / 2
+      const cy = rect.height / 2
+      const zoomRatio = newZoom / currentZoom
+      setPanOffset(prev => ({
+        x: cx - (cx - prev.x) * zoomRatio,
+        y: cy - (cy - prev.y) * zoomRatio
+      }))
+    }
+    setZoom(newZoom)
+    zoomRef.current = newZoom
+  }, [])
 
   useEffect(() => {
     if (draggedNode || isPanning) {
@@ -117,6 +201,14 @@ export function useDialogueEditor() {
       return () => canvas.removeEventListener('wheel', handleWheel)
     }
   }, [handleWheel])
+
+  // Keep refs in sync with state that are read in rAF
+  useEffect(() => { panOffsetRef.current = panOffset }, [panOffset])
+  useEffect(() => { zoomRef.current = zoom }, [zoom])
+  useEffect(() => { isPanningRef.current = isPanning }, [isPanning])
+  useEffect(() => { draggedNodeRef.current = draggedNode }, [draggedNode])
+  useEffect(() => { dragOffsetRef.current = dragOffset }, [dragOffset])
+  useEffect(() => { lastPanPositionRef.current = lastPanPosition }, [lastPanPosition])
 
   // Handle page exit warning
   useEffect(() => {
@@ -300,6 +392,8 @@ export function useDialogueEditor() {
     nodes,
     connections,
     selectedNode,
+    draggedNode,
+    dragGhost,
     connecting,
     removing,
     firstLinkClick,
@@ -320,5 +414,8 @@ export function useDialogueEditor() {
     cancelConnecting,
     cancelRemoving,
     loadNodesAndConnections,
+    zoomIn,
+    zoomOut,
+    resetZoom,
   }
 } 
