@@ -175,7 +175,29 @@ export function DialogueToolbar({
                     reader.onload = (e) => {
                       try {
                         const json = JSON.parse(e.target?.result as string);
-                        onLoadData(json.nodes, json.connections);
+                        // Backward compatibility: merge top-level consequences into answers
+                        let nodesToLoad = json.nodes as NodeData[];
+                        const topLevelConsequences = Array.isArray(json.consequences) ? json.consequences : [];
+                        if (topLevelConsequences.length > 0 && Array.isArray(nodesToLoad)) {
+                          const consequenceByAnswerId = new Map<string, any>();
+                          topLevelConsequences.forEach((item: any) => {
+                            const c = item?.consequences;
+                            if (c?.answerNodeId) {
+                              consequenceByAnswerId.set(c.answerNodeId, c);
+                            }
+                          });
+                          nodesToLoad = nodesToLoad.map(node => ({
+                            ...node,
+                            data: {
+                              ...node.data,
+                              answers: node.data?.answers?.map(answer => {
+                                const merged = answer.consequences ?? consequenceByAnswerId.get(answer.id);
+                                return merged ? { ...answer, consequences: merged } : answer;
+                              })
+                            }
+                          }));
+                        }
+                        onLoadData(nodesToLoad, json.connections);
                         toast.success('File loaded successfully');
                         fileInputRef.current!.value = "";
                       } catch (err) {
