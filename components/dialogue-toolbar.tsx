@@ -215,7 +215,37 @@ export function DialogueToolbar({
                     reader.onload = (e) => {
                       try {
                         const json = JSON.parse(e.target?.result as string);
-                        loadNodesAndConnections(json.nodes, json.connections);
+                        // Reattach flattened consequences back onto their corresponding answers (by answer.id)
+                        const consequencesArray = Array.isArray(json.consequences) ? json.consequences : [];
+                        // Support both shapes:
+                        // 1) [{ answerNodeId, questionsToAdd, questionsToRemove }]
+                        // 2) [{ consequences: { answerNodeId, questionsToAdd, questionsToRemove } }]
+                        const normalizedConsequences = consequencesArray
+                          .map((item: any) => {
+                            if (!item) return null;
+                            if (item.consequences && typeof item.consequences === "object") return item.consequences;
+                            return item;
+                          })
+                          .filter((c: any) => c && typeof c.answerNodeId === "string" && c.answerNodeId.trim().length > 0);
+                        const consequencesByAnswerId = new Map<string, any>(
+                          normalizedConsequences.map((c: any) => [c.answerNodeId, c])
+                        );
+
+                        const nodesWithConsequences = (json.nodes || []).map((node: any) => {
+                          const updatedAnswers = node?.data?.answers?.map((answer: any) => {
+                            const found = consequencesByAnswerId.get(answer.id);
+                            return found ? { ...answer, consequences: found } : answer;
+                          });
+                          return {
+                            ...node,
+                            data: {
+                              ...node.data,
+                              answers: updatedAnswers ?? node?.data?.answers,
+                            },
+                          };
+                        });
+
+                        loadNodesAndConnections(nodesWithConsequences, json.connections);
                         toast.success('File loaded successfully');
                         resetZoom();
                         fileInputRef.current!.value = "";

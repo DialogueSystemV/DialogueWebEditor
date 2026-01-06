@@ -30,6 +30,11 @@ export function MultiSelect({
   className,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleUnselect = (item: string) => {
     onChange(selected.filter((i) => i !== item))
@@ -50,13 +55,14 @@ export function MultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          suppressHydrationWarning
           className={cn(
             "w-full justify-between text-left font-normal bg-gray-900 border-gray-600 text-white hover:bg-gray-800 !px-2 !py-5",
             className,
           )}
         >
           <div className="flex overflow-x-hidden">
-            {selected.length > 0 ? (
+            {mounted && selected.length > 0 ? (
               <>
                 {selected.slice(0, 2).map((item) => {
                   const option = options.find((opt) => opt.value === item)
