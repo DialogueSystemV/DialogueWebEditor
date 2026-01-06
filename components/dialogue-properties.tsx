@@ -352,7 +352,11 @@ export function DialogueProperties() {
                   id: Date.now().toString(),
                   title: `Answer #${selectedNode.data.answers?.length ? selectedNode.data.answers.length + 1 : 1}`,
                   text: "",
-                  probability: selectedNode.data.answers?.length ? 100 - selectedNode.data.answers.reduce((sum, a) => sum + a.probability, 0) : 100,
+                  probability: (() => {
+                    if (!selectedNode.data.answers?.length) return 100;
+                    const totalProb = selectedNode.data.answers.reduce((sum, a) => sum + a.probability, 0);
+                    return Math.max(Math.max(100 / selectedNode.data.answers?.length, 0), 100 - totalProb);
+                  })(),
                   condition: undefined,
                   endsCondition: false,
                   action: undefined,

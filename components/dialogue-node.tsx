@@ -1,6 +1,6 @@
 "use client"
 
-import React, { memo } from "react"
+import React from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -21,7 +21,7 @@ interface DialogueNodeProps {
   cloneNode: (nodeId: string) => void
 }
 
-export const DialogueNode = memo(function DialogueNode({
+export function DialogueNode({
   node,
   isSelected,
   connecting,
@@ -193,26 +193,4 @@ export const DialogueNode = memo(function DialogueNode({
       </div>
     </Card>
   )
-}, (prevProps, nextProps) => {
-  // Return true if props are equal (skip re-render), false if different (re-render)
-  // Only check answers length, not full content (expensive)
-  const prevAnswersLength = prevProps.node.data.answers?.length ?? 0
-  const nextAnswersLength = nextProps.node.data.answers?.length ?? 0
-  
-  return (
-    prevProps.node.id === nextProps.node.id &&
-    prevProps.node.position.x === nextProps.node.position.x &&
-    prevProps.node.position.y === nextProps.node.position.y &&
-    prevProps.node.title === nextProps.node.title &&
-    prevProps.node.startsConversation === nextProps.node.startsConversation &&
-    prevProps.node.removeQuestionAfterAsked === nextProps.node.removeQuestionAfterAsked &&
-    prevProps.node.data.questionText === nextProps.node.data.questionText &&
-    prevAnswersLength === nextAnswersLength &&
-    prevProps.isSelected === nextProps.isSelected &&
-    prevProps.connecting?.nodeId === nextProps.connecting?.nodeId &&
-    prevProps.firstLinkClick === nextProps.firstLinkClick &&
-    prevProps.zoom === nextProps.zoom &&
-    prevProps.panOffset.x === nextProps.panOffset.x &&
-    prevProps.panOffset.y === nextProps.panOffset.y
-  )
-}) 
+}

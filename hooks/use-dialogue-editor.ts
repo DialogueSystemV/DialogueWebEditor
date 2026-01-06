@@ -241,6 +241,7 @@ export function useDialogueEditor() {
       },
     }
     setNodes((prev) => [...prev, newNode])
+    setSelectedNode(newNode.id)
   }
 
   const deleteNode = (nodeId: string) => {

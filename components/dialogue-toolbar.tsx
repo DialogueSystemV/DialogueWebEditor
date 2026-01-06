@@ -217,6 +217,7 @@ export function DialogueToolbar({
                         const json = JSON.parse(e.target?.result as string);
                         loadNodesAndConnections(json.nodes, json.connections);
                         toast.success('File loaded successfully');
+                        resetZoom();
                         fileInputRef.current!.value = "";
                       } catch (err) {
                         toast.error('Invalid file format');
